@@ -69,18 +69,14 @@ class RectComponent(UIComponent, ABC):
 class _RectComponent(RectComponent):
     """Represents a component which is a simple rectangle"""
 
-    def __init__(self, position: Vec2, size: Vec2, surface: pg.Surface) -> None:
+    def __init__(self, position: Vec2, size: Vec2, surface: pg.Surface, colour: tuple[int, int, int] = RED) -> None:
         super().__init__(position, surface)
         self._size = size
+        self.colour = colour
 
     def render(self) -> None:
         """Render a rectangle"""
-        colour = RED
-        if self.hovered:
-            colour = GREEN
-        if self.clicked:
-            colour = BLUE
-        pg.draw.rect(self.surface, colour, self.rect)
+        pg.draw.rect(self.surface, self.colour, self.rect)
 
     @property
     def size(self) -> Vec2:
@@ -121,6 +117,11 @@ class Button(RectComponent):
 
     def render(self) -> None:
         """Render the button"""
+        self.base.colour = RED
+        if self.hovered:
+            self.base.colour = GREEN
+        if self.clicked >= 0:
+            self.base.colour = BLUE
         self.base.render()
         self.label.render()
 

@@ -69,7 +69,7 @@ class GUI:
         @event_handler(pg.MOUSEBUTTONUP)
         def _on_mouse_released(event: Event):
             for component in reversed(self._components):
-                component.clicked = False
+                component.clicked = -1
             return EventResult()
 
     @staticmethod
