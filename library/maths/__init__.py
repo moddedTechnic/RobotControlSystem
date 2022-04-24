@@ -1,6 +1,5 @@
-def main():
-    """Put code here to be run when the module is run"""
+"""Items relating to maths"""
 
-
-if __name__ == '__main__':
-    main()
+__author__ = 'Jonathan Leeming'
+__version__ = '0.1'
+__all__ = []
