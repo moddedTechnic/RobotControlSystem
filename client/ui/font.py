@@ -7,8 +7,6 @@ __all__ = ['init', 'Font']
 from pathlib import Path
 from typing import Optional
 
-import pygame as pg
-
 _fonts_dir: Optional[Path] = None
 
 
@@ -18,7 +16,7 @@ def init(assets_dir: Path) -> None:
     _fonts_dir = assets_dir / 'fonts'
 
 
-def Font(name: str, /, size: int, *, weight: int = 400, italic: bool = False) -> pg.font.Font:
+def Font(name: str, /, size: int, *, weight: int = 400, italic: bool = False) -> None:
     """Load a font"""
     variant = {
         300: 'light',
@@ -29,4 +27,4 @@ def Font(name: str, /, size: int, *, weight: int = 400, italic: bool = False) ->
     if italic:
         variant += 'italic'
     variant += '.ttf'
-    return pg.font.Font(_fonts_dir / name / variant, size)
+    font_file = _fonts_dir / name / variant

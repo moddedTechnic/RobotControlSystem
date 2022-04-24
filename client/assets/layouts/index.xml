@@ -1,4 +1,4 @@
-<document title="Robot Control System">
+<window title="Robot Control System">
     <menu>
         <menuitem name="File">
             <menuitem name="New" />
@@ -46,11 +46,11 @@
         <menuitem name="Connect" />
     </menu>
 
-    <text />
+    <text ref="command_history" />
 
     <row>
         <button icon="help" />
         <input type="text" />
         <button>Execute</button>
     </row>
-</document>
+</window>
