@@ -1,0 +1,56 @@
+<document title="Robot Control System">
+    <menu>
+        <menuitem name="File">
+            <menuitem name="New" />
+            <menuitem name="Open" />
+            <menuitem name="Examples" />
+            <separator />
+            <menuitem name="Save" />
+            <menuitem name="Save As" />
+            <separator />
+            <menuitem name="Close" />
+            <menuitem name="Quit" />
+            <separator />
+            <menuitem name="Preferences" />
+        </menuitem>
+
+        <separator />
+
+        <menuitem name="Edit">
+            <menuitem name="Undo" />
+            <menuitem name="Redo" />
+            <separator />
+            <menuitem name="Copy" />
+            <menuitem name="Cut" />
+            <menuitem name="Paste" />
+            <menuitem name="Select All" />
+            <separator />
+            <menuitem name="Comment/Uncomment" />
+            <menuitem name="Indent" />
+            <menuitem name="Dedent" />
+            <separator />
+            <menuitem name="Find" />
+            <menuitem name="Replace" />
+        </menuitem>
+
+        <separator />
+
+        <menuitem name="View">
+            <menuitem name="Robot Information" />
+            <menuitem name="Robot Map" />
+            <menuitem name="Robot History" />
+        </menuitem>
+
+        <separator />
+
+        <menuitem name="Connect" />
+    </menu>
+
+    <text />
+
+    <row>
+        <button icon="help" />
+        <input type="text" />
+        <button>Execute</button>
+    </row>
+</document>
