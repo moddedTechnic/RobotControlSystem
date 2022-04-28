@@ -194,3 +194,11 @@ class GUIBuilder:
     @staticmethod
     def _build_br(node: _TagNode, _: Optional[tk.Tk]) -> _TagNode:
         return node
+
+    @staticmethod
+    def _build_tab(node: _TagNode, _: Optional[tk.Tk]) -> _TagNode:
+        return node
+
+    @staticmethod
+    def _build_separator(node: _TagNode, _: Optional[tk.Tk]) -> _TagNode:
+        return node
