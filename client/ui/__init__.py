@@ -95,7 +95,8 @@ class _DocumentParser(HTMLParser):
 
     def handle_data(self, data: str) -> None:
         """Add text to the parent node"""
-        self.stack[-1].children.append(_TextNode(data))
+        if self.stack:
+            self.stack[-1].children.append(_TextNode(data))
 
 
 class GUIBuilder:
