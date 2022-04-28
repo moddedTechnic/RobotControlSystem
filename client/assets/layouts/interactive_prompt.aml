@@ -1,0 +1,11 @@
+<window title="Robot Control System - Interactive Prompt">
+    <include name="header" />
+
+    <text ref="command_history" />
+
+    <row>
+        <button icon="help" ref="help">Help</button>
+        <input type="text" ref="command" />
+        <button ref="execute">Execute</button>
+    </row>
+</window>

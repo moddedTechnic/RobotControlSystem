@@ -1,0 +1,40 @@
+<menu>
+    <menuitem name="File">
+        <menuitem name="New" ref="new" />
+        <menuitem name="Open" ref="open" />
+        <menuitem name="Examples" />
+        <separator />
+        <menuitem name="Save" ref="save" />
+        <menuitem name="Save As" ref="save_as" />
+        <separator />
+        <menuitem name="Close" ref="close" />
+        <menuitem name="Quit" ref="quit" />
+        <separator />
+        <menuitem name="Preferences" ref="preferences" />
+    </menuitem>
+
+    <menuitem name="Edit">
+        <menuitem name="Undo" ref="undo" />
+        <menuitem name="Redo" ref="redo" />
+        <separator />
+        <menuitem name="Copy" cef="copy" />
+        <menuitem name="Cut" ref="cut" />
+        <menuitem name="Paste" ref="paste" />
+        <menuitem name="Select All" ref="select_all" />
+        <separator />
+        <menuitem name="Comment/Uncomment" ref="comment" />
+        <menuitem name="Indent" ref="indent" />
+        <menuitem name="Dedent" ref="dedent" />
+        <separator />
+        <menuitem name="Find" ref="find" />
+        <menuitem name="Replace" ref="replace" />
+    </menuitem>
+
+    <menuitem name="View">
+        <menuitem name="Robot Information" ref="show_robot_info" />
+        <menuitem name="Robot Map" ref="show_robot_map" />
+        <menuitem name="Robot History" ref="show_robot_history" />
+    </menuitem>
+
+    <menuitem name="Connect" ref="connect" />
+</menu>

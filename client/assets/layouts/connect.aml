@@ -1,0 +1,5 @@
+<window title="Robot Control System - Connect">
+    <text>Connect</text>
+    <input type="dropdown" ref="robot" value="Select a robot" />
+    <button ref="connect">Connect</button>
+</window>
