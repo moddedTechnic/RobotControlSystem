@@ -4,20 +4,35 @@ __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
 __all__ = ['GUI', 'GUIBuilder']
 
+import os
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
-from typing import Type, Union, Optional, Iterator, Iterable
+from typing import Type, Union, Optional, Iterator, Iterable, Any, Callable
 
 
 class GUI(tk.Tk):
     """Class to create a graphical user interface"""
 
+    def __init__(self, *args, assets_dir: Path, controller: Optional['GUI'], **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.assets_dir = assets_dir
+        self.controller = controller
+        self.images = []
+        self.modals = []
+        self.variables = []
+
     def run(self) -> None:
         """Run the application"""
         self.mainloop()
+
+    def open_modal_from_file(self, controller_type: Type['GUI'], name: str) -> 'GUI':
+        """Open a modal from a file"""
+        modal = GUIBuilder(controller_type, self.assets_dir, controller=self).build_from_file(name)
+        self.modals.append(modal)
+        return modal
 
 
 Attributes = list[tuple[str, str | None]]
@@ -86,25 +101,42 @@ class _DocumentParser(HTMLParser):
 class GUIBuilder:
     """Tool to build GUIs"""
 
-    def __init__(self, widget_type: Type[GUI]) -> None:
+    _icon_suffixes: list[str] = [
+        '.svg', '.png', '.jpg', '.jpeg',
+    ]
+
+    def __init__(self, widget_type: Type[GUI], assets_dir: Path, controller: Optional[GUI] = None) -> None:
         self.widget_type = widget_type
         self.document_parser = _DocumentParser()
         self.width, self.height = self.size = 0, 0
+        self.assets_dir = assets_dir
+        self.icons_dir = assets_dir / 'icons'
+        self.controller = controller
 
-    def build_from_file(self, path: Path) -> Optional[GUI]:
+    def build_from_file(self, name: str) -> Optional[GUI]:
         """Build a GUI from an XML file"""
+        return self._build_from_file(name=name)
+
+    def _build_from_file(
+            self, *,
+            name: Optional[str] = None, path: Optional[Path] = None,
+            parent: Union[tk.Tk, tk.Widget, None] = None,
+    ) -> Union[tk.Widget, tk.Tk, None]:
+        if name is not None:
+            path = self.assets_dir / 'layouts' / f'{name}.aml'
         self.document_parser.feed(path.read_text())
         if (result := self.document_parser.result) is not None:
-            return self.build(result)
+            return self.build(result, parent)
         return None
 
-    def build(self, node: _Node, parent: Optional[tk.Tk] = None) -> Union[GUI, tk.Tk, str]:
+    def build(self, node: _Node, parent: Union[tk.Tk, ttk.Frame, None] = None) -> Union[GUI, tk.Tk, str]:
         """Build a GUI"""
         if isinstance(node, _TextNode):
             return node.text
         if isinstance(node, _TagNode):
             func_name = f'_build_{node.tag}'
-            func = getattr(self, func_name, self._build_unknown)
+            func: Callable[[_Node, Optional[tk.Tk, ttk.Frame]], Union[GUI, tk.Tk, str]] = \
+                getattr(self, func_name, self._build_unknown)
             return func(node, parent)
 
     def prepare_text(self, text: Union[str, Iterable[str]]) -> str:

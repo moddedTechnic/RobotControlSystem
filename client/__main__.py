@@ -24,10 +24,9 @@ class RobotController(GUI):
 def main():
     """Put code here to be run when the module is run"""
     assets_dir = __dir__ / 'assets'
-    layouts_dir = assets_dir / 'layouts'
     font.init(assets_dir)
-    gui_builder = GUIBuilder(RobotController)
-    gui = gui_builder.build_from_file(layouts_dir / 'test.xml')
+    gui_builder = GUIBuilder(InteractivePromptController, assets_dir)
+    gui = gui_builder.build_from_file('interactive_prompt')
     gui.run()
 
 
