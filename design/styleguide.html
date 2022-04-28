@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Style Guide</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Ubuntu&family=Ubuntu+Mono&display=swap" rel="stylesheet">
+
+        <style>
+            * {
+                font-family: sans-serif;
+            }
+
+            .cards {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .card {
+                border: 1px solid black;
+                border-radius: 0.5rem;
+
+                display: grid;
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr;
+
+                padding-block: 0.5rem;
+                padding-inline: 1rem;
+
+                text-decoration: none;
+            }
+
+            .card:hover {
+                background-color: #F8EBD7;
+            }
+
+            [data-font="ubuntu"] {
+                font-family: "Ubuntu";
+            }
+
+            [data-font="ubuntu-mono"] {
+                font-family: "Ubuntu Mono";
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>Style Guide</h1>
+    
+        <section id="colours">
+            <h2>Colours</h2>
+        </section>
+        
+        <section id="fonts">
+            <h2>Fonts</h2>
+            
+            <div class="cards">
+                <a href="https://fonts.google.com/specimen/Ubuntu" class="card" data-font="ubuntu">
+                    Ubuntu
+                </a>
+                <a href="https://fonts.google.com/specimen/Ubuntu+Mono" class="card" data-font="ubuntu-mono">
+                    Ubuntu Mono
+                </a>
+            </div>
+        </section>
+
+        <section id="typography">
+            <h2>Typography</h2>
+        </section>
+    </body>
+</html>
