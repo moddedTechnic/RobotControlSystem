@@ -12,7 +12,8 @@ __dir__ = Path(__file__).parent
 sys.path.insert(0, os.fspath(__dir__))
 sys.path.insert(1, os.fspath(__dir__.parent))
 
-from ui import GUI, GUIBuilder, font
+from library.ui import GUI, GUIBuilder
+from library.ui import font
 
 
 class ConnectController(GUI):
