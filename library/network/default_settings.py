@@ -2,7 +2,7 @@
 
 __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
-__all__ = []
+__all__ = ['HOST_NAME', 'PORT', 'SERVER', 'ENCODING']
 
 import socket
 

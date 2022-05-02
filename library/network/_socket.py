@@ -7,9 +7,11 @@ __all__ = ['Address', 'Connection', 'Socket']
 import socket
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from functools import partial
 from typing import Union, Optional, NamedTuple
 
 from . import default_settings
+from .message import Message, MessageType
 
 
 class Address(NamedTuple):
@@ -48,20 +50,40 @@ class Socket(ABC):
     def disconnect(self) -> None:
         """Disconnect from the server"""
 
-    def send(self, message: str, target: Union[socket.socket, Connection, None] = None) -> bool:
+    def send(self, message: Message, target: Union[socket.socket, Connection, None] = None) -> bool:
         """Send a message to either `target` or the current socket"""
         if target is None:
             target = self.socket
         if isinstance(target, Connection):
             target = target.connection
-        raise NotImplementedError
-        return False
+        header, body = message.transmission_chunks
+        header_bytes = header.encode(default_settings.ENCODING)
+        header_length = len(header_bytes).to_bytes(2, 'big')
+        target.send(header_length)
+        target.send(header_bytes)
+        if body is not None:
+            target.send(body.encode(default_settings.ENCODING))
+        return True
 
-    def receive(self, target: Union[socket.socket, Connection, None] = None) -> Optional[str]:
+    def receive(self, target: Union[socket.socket, Connection, None] = None) -> Optional[Message]:
         """Receive a message from either `target` or the current socket"""
         if target is None:
             target = self.socket
         if isinstance(target, Connection):
             target = target.connection
-        raise NotImplementedError
+        header_length = int.from_bytes(target.recv(2), 'big')
+        header_bytes = target.recv(header_length)
+        headers = dict(map(
+            lambda x: (x[0].strip(), x[1].strip()),
+            map(partial(str.split, sep=':'), header_bytes.decode(default_settings.ENCODING).split('\n'))
+        ))
+        if 'message-type' not in headers:
+            return None  # if we don't know what the content type is, we can't handle the message
+        message_type = MessageType.from_name(headers['message-type'])
+        if message_type is MessageType.DISCONNECT:
+            return Message.disconnect()
+        if message_type.has_body:
+            message_length = int(headers['message-length'])
+            body = target.recv(message_length).decode(default_settings.ENCODING)
+            return Message(message_type, body)
         return None

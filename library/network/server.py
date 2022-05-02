@@ -2,20 +2,27 @@
 
 __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
-__all__ = ['Server']
+__all__ = ['Server', 'MessageHandler']
 
 import socket
+import sys
+import traceback
+from typing import Callable
 
-from . import default_settings
 from ._socket import Address, Connection, Socket
+from .message import MessageType, Message
+
+
+MessageHandler = Callable[[Message], None]
 
 
 class Server(Socket):
     """Represents a network server"""
 
-    def __init__(self, hostname: str = None, port: int = None) -> None:
+    def __init__(self, message_handler: MessageHandler, /, *, hostname: str = None, port: int = None) -> None:
         super().__init__(hostname, port)
         self.connections: dict[Address, Connection] = {}
+        self.process_message = message_handler
 
     def connect(self) -> None:
         """Connect the server to the appropriate address"""
@@ -37,8 +44,8 @@ class Server(Socket):
                 self.connect_client(conn, Address(*address))
             except KeyboardInterrupt:
                 break
-            except Exception as e:
-                print('An error occurred:', e)
+            except Exception as ex:
+                print(*traceback.format_exception(type(ex), ex, ex.__traceback__), sep='', file=sys.stderr)
 
     def connect_client(self, conn: socket.socket, address: Address) -> None:
         """Connect a client to the server"""
@@ -52,6 +59,9 @@ class Server(Socket):
     def handle_client(self, connection: Connection) -> None:
         """Handle a client message"""
         msg = self.receive(target=connection)
-        if msg == default_settings.DISCONNECT_MESSAGE:
+        if msg is None:
+            return
+        if msg.type is MessageType.DISCONNECT:
             self.connections[connection.address].connected = False
             return
+        self.process_message(msg)

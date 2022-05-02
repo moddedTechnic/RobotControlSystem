@@ -5,6 +5,7 @@ __version__ = '0.1'
 __all__ = ['Client']
 
 from library.network._socket import Socket
+from library.network.message import Message
 
 
 class Client(Socket):
@@ -16,4 +17,4 @@ class Client(Socket):
 
     def disconnect(self) -> None:
         """Disconnect from the server"""
-        self.send(DISCONNECT_MESSAGE)
+        self.send(Message.disconnect())
