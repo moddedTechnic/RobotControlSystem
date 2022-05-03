@@ -7,13 +7,14 @@ __all__ = ['Server', 'MessageHandler']
 import socket
 import sys
 import traceback
+from functools import partial
 from typing import Callable
 
 from ._socket import Address, Connection, Socket
 from .message import MessageType, Message
 
 
-MessageHandler = Callable[[Message], None]
+MessageHandler = Callable[[Callable, Message], None]
 
 
 class Server(Socket):
@@ -64,4 +65,4 @@ class Server(Socket):
         if msg.type is MessageType.DISCONNECT:
             self.connections[connection.address].connected = False
             return
-        self.process_message(msg)
+        self.process_message(partial(self.send, target=connection), msg)
