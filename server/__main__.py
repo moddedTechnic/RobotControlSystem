@@ -13,13 +13,13 @@ sys.path.insert(0, os.fspath(__dir__))
 sys.path.insert(1, os.fspath(__dir__.parent))
 
 from library.network.server import Server
-from library.network.message import Message
+from library.network.message import Message, MessageType
 
 
 def handle_message(send, message: Message) -> None:
-    """andle a message"""
-    print('Received', message)
-    send(message)
+    """Handle a message"""
+    if message.type is MessageType.CODE:
+        print('Received code:', message.body)
 
 
 def main():
