@@ -346,16 +346,16 @@ class GUIBuilder:
                     handler_name = f'on_{refs[value]}_selected'
                     if hasattr(controller, handler_name):
                         handler = getattr(controller, handler_name)
-                        handler()
+                        handler(options[options.index(str(value))])
 
-            dropdown = ttk.OptionMenu(parent, dropdown_var, *options, command=_on_dropdown_set)
+            dropdown = ttk.OptionMenu(parent, dropdown_var, *[str(o) for o in options], command=_on_dropdown_set)
             self.gui.variables.append(dropdown_var)
 
             if 'ref' in node:
                 def _update_options():
                     nonlocal options, refs
                     options, refs = self._get_options(node)
-                    dropdown.set_menu(node['value'] if 'value' in node else None, *options)
+                    dropdown.set_menu(node['value'] if 'value' in node else None, *[str(o) for o in options])
 
                 setattr(self.gui, f'update_{node["ref"]}_options', _update_options)
                 setattr(self.gui, node['ref'], dropdown_var)
