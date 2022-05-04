@@ -1,0 +1,15 @@
+<window title="Robot Control System - Add Robot">
+    <text>Connect</text>
+    <row>
+        <text>Name</text>
+        <input type="text" ref="name" />
+    </row>
+    <row>
+        <text>IP Address</text>
+        <input type="text" ref="address" />
+    </row>
+    <row>
+        <button ref="save">Save</button>
+        <button ref="connect">Connect</button>
+    </row>
+</window>
