@@ -220,8 +220,11 @@ class GUIBuilder:
         if hasattr(self.gui, options_name):
             for option in getattr(self.gui, options_name)():
                 if isinstance(option, tuple):
-                    option, ref = option
-                    refs[option] = ref
+                    if len(option) == 1:
+                        option = option[0]
+                    else:
+                        option, ref = option
+                        refs[option] = ref
                 options.append(option)
         return options, refs
 
