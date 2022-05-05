@@ -7,6 +7,7 @@ __all__ = ['InteractivePromptController']
 from client.connect_controller import ConnectController
 from client.robot import Robot
 from library.network.client import Client
+from library.network.message import Message
 from library.ui import GUI
 
 
@@ -108,4 +109,12 @@ class InteractivePromptController(GUI):
 
     def on_execute_clicked(self) -> None:
         """Send the command to the robot"""
-        print(self.get_command())
+        if self.client is None:
+            return  # we should probably let the user know that nothing's happened
+        self.client.send(Message.code(self.get_command()))
+
+    def destroy(self) -> None:
+        """Destroy the window"""
+        if self.client is not None:
+            self.client = self.client.disconnect()
+        return super().destroy()
