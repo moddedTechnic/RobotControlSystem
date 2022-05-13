@@ -114,6 +114,26 @@ class ArithmeticTestCase(unittest.TestCase):
         self.assertEqual((2, 1), evaluate('2 * 1.0;').as_tuple())
         self.assertEqual((2, 1), evaluate('2.0 * 1;').as_tuple())
 
+    def test_division(self) -> None:
+        self.assertEqual((2, 3), evaluate('2 / 3;').as_tuple())
+        self.assertEqual((2, 3), evaluate('2.0 / 3.0;').as_tuple())
+        self.assertEqual((2, 3), evaluate('2 / 3.0;').as_tuple())
+        self.assertEqual((2, 3), evaluate('2.0 / 3;').as_tuple())
+
+        with self.assertRaises(ZeroDivisionError):
+            evaluate('2 / 0;')
+        with self.assertRaises(ZeroDivisionError):
+            evaluate('2.0 / 0.0;')
+        with self.assertRaises(ZeroDivisionError):
+            evaluate('2 / 0.0;')
+        with self.assertRaises(ZeroDivisionError):
+            evaluate('2.0 / 0;')
+
+        self.assertEqual((2, 1), evaluate('2 / 1;').as_tuple())
+        self.assertEqual((2, 1), evaluate('2.0 / 1.0;').as_tuple())
+        self.assertEqual((2, 1), evaluate('2 / 1.0;').as_tuple())
+        self.assertEqual((2, 1), evaluate('2.0 / 1;').as_tuple())
+
 
 if __name__ == '__main__':
     unittest.main()
