@@ -57,6 +57,8 @@ class Rational(Value):
         gcd = maths.gcd(numerator, denominator)
         self.numerator = numerator // gcd
         self.denominator = denominator // gcd
+        if self.denominator == 0:
+            raise ZeroDivisionError(f'Attempted to divide {numerator} by 0')
 
     def __repr__(self):
         return f'{self.numerator} / {self.denominator}'
@@ -123,7 +125,7 @@ class Rational(Value):
     @Function.from_native
     def reverse_operator_slash(self, other: 'Integer | Rational') -> 'Rational':
         """Implement the reverse division operator"""
-        return self.operator_star.call(Rational(self.reciprocal.call(self)), other)
+        return self.operator_star.call(self.reciprocal.call(self), other)
 
     @Function.from_native
     def unary_operator_plus(self) -> 'Rational':
