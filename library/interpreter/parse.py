@@ -2,14 +2,14 @@
 
 __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
-__all__ = ['parse']
+__all__ = ['parse', 'Parser']
 
 from typing import Iterable
 
 from dependencies.sly.sly import Parser as _Parser
 
 from .lex import Lexer, Token
-from .variables import Integer
+from .variables import Integer, Context, Type, Value
 
 
 def _do_binary_operator(name: str, op: str, a, b):
@@ -51,24 +51,33 @@ class Parser(_Parser):
         ('left', PERIOD),
     )
 
-    def __init__(self):
-        self.names = {}
+    def __init__(self) -> None:
+        self.context = Context()
 
     @_('IDENTIFIER IDENTIFIER ASSIGN expr SEMI')
     def statement(self, p):
         """Declare a variable"""
-        typ = p.IDENTIFIER0
-        name = p.IDENTIFIER1
-        value = p.expr
-        print(typ, name, value)
+        typ = self.context[p.IDENTIFIER0]
+        if not (isinstance(typ, Type) or (isinstance(typ, type) and issubclass(typ, Value))):
+            raise TypeError(f'Cannot create a variable of type "{typ}" - it is not a type')
+        self.context.declare(p.IDENTIFIER1, typ, p.expr)
+
+    @_('IDENTIFIER IDENTIFIER SEMI')
+    def statement(self, p):
+        """Declare a variable"""
+        typ = self.context[p.IDENTIFIER0]
+        if not (isinstance(typ, Type) or (isinstance(typ, type) and issubclass(typ, Value))):
+            raise TypeError(f'Cannot create a variable of type "{typ}" - it is not a type')
+        self.context.declare(p.IDENTIFIER1, typ)
 
     @_('IDENTIFIER ASSIGN expr SEMI')
     def statement(self, p):
-        name = p.IDENTIFIER
-        value = p.expr
+        """Assign a value to a variable"""
+        self.context[p.IDENTIFIER] = p.expr
 
     @_('expr SEMI')
     def statement(self, p):
+        """A statement which is just an expression"""
         return p.expr
 
     @_('expr PERIOD expr')
