@@ -280,9 +280,9 @@ class Context:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.pop()
 
-    def declare(self, name: str, typ: type | Type, value: Value = undefined) -> None:
+    def declare(self, name: str, typ: type | Type, value: Value = undefined, const: bool = False) -> None:
         """Declare a variable in the top-most stack frame"""
-        self.stack[-1][name] = Variable(value, typ)
+        self.stack[-1][name] = Variable(value, typ, const)
 
     def push(self, frame: Optional[Frame] = None) -> None:
         """Push a frame to the stack"""
