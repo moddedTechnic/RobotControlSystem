@@ -160,7 +160,31 @@ class ArithmeticTestCase(unittest.TestCase):
             evaluate('x = 5;', parser=parser)
             self.assertIn('x', parser.context)
             self.assertIsInstance(parser.context['x'], Integer)
-            self.assertEqual(parser.context['x'].value, 5)
+            self.assertEqual(5, parser.context['x'].value)
+
+    def test_variable_access(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int x = 5;', parser=parser)
+            x = evaluate('x;', parser=parser)
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(5, x.value)
+
+        with parser.context:
+            with self.assertRaises(NameError):
+                evaluate('y;', parser=parser)
+
+    def test_weird_variables(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int 0 = 1;', parser=parser)
+            _0 = evaluate('0;', parser=parser)
+            self.assertIsInstance(_0, Integer)
+            self.assertEqual(1, _0.value)
 
 
 if __name__ == '__main__':

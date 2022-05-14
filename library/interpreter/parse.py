@@ -123,14 +123,13 @@ class Parser(_Parser):
     @_('IDENTIFIER')
     def expr(self, p):
         """An expression containing a single identifier"""
-        value: str = p.IDENTIFIER
-        if value.isdigit():
-            return Integer(p.IDENTIFIER)
+        name: str = p.IDENTIFIER
         try:
-            return self.names[p.IDENTIFIER]
-        except LookupError:
-            print(f'Undefined name {p.IDENTIFIER!r}')
-            return 0
+            return self.context[name]
+        except NameError:
+            if name.isdigit():
+                return Integer(name)
+            raise
 
 
 _parser = Parser()
