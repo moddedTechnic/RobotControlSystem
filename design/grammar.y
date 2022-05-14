@@ -19,6 +19,8 @@ program   : program statement
 
 statement : IDENTIFIER IDENTIFIER '=' expr ';'
           | IDENTIFIER IDENTIFIER ';'
+          | KWD_CONST IDENTIFIER IDENTIFIER '=' expr ';'
+          | KWD_CONST IDENTIFIER IDENTIFIER ';'
           | IDENTIFIER '=' expr ';'
           | expr ';'
           ;
