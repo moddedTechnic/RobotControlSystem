@@ -2,24 +2,41 @@
 
 __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
-__all__ = ['Integer', 'Rational']
+__all__ = ['Integer', 'Rational', 'Context', 'Undefined', 'Type', 'Value', 'Variable']
 
 from dataclasses import dataclass
-from typing import Any, Union, Optional, Callable
+from typing import Any, Union, Optional, Callable, Type as PyType
 
 from library import maths
 
 from .nodes import Node
 
 
-class Type:
-    pass
-
-
 @dataclass
 class Value:
-    typ: Union[type, Type]
+    """Represents a value"""
+    typ: Union[type, 'Type']
     value: Any
+
+
+class Type(Value):
+    """Represents a type"""
+
+    def __init__(self, value: Any) -> None:
+        super().__init__(Type, value)
+
+
+class _Undefined(Value):
+    """Used to mark that a name has no value"""
+
+    def __init__(self) -> None:
+        self.typ = _Undefined
+
+    def __repr__(self) -> str:
+        return f'undefined'
+
+
+Undefined = _Undefined()
 
 
 class Signature:
@@ -193,7 +210,15 @@ class Integer(Value):
         return Rational(self.value * (10 ** x) + other.value, 10 ** x)
 
 
-Frame = dict[str, Value]
+@dataclass
+class Variable:
+    """Represents a variable in the context"""
+    value: Value | PyType[Value]
+    type: type
+    const: bool = False
+
+
+Frame = dict[str, Variable]
 
 
 class Context:
@@ -202,3 +227,40 @@ class Context:
     def __init__(self) -> None:
         self.stack: list[Frame] = []
         self.__returns: Optional[Value] = None
+
+    def __getitem__(self, name: str) -> Value:
+        for frame in reversed(self.stack):
+            if name in frame and frame[name] is not Undefined:
+                return frame[name].value
+        raise NameError(f'"{name}" was not defined')
+
+    def __setitem__(self, name: str, value: Value) -> None:
+        for frame in reversed(self.stack):
+            if name in frame and isinstance(value, frame[name].type) and not frame[name].const:
+                frame[name].value = value
+                return
+        raise NameError(f'"{name}" was not declared in the current scope, or it was declared as constant')
+
+    def __contains__(self, name: str) -> bool:
+        for frame in self.stack:
+            if name in frame:
+                return True
+        return False
+
+    def __enter__(self) -> None:
+        self.push()
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.pop()
+
+    def declare(self, name: str, typ: type | Type, value: Value = Undefined) -> None:
+        """Declare a variable in the top-most stack frame"""
+        self.stack[-1][name] = Variable(value, typ)
+
+    def push(self, frame: Optional[Frame] = None) -> None:
+        """Push a frame to the stack"""
+        self.stack.append({} if frame is None else frame)
+
+    def pop(self) -> None:
+        """Pop a frame from the stack"""
+        self.stack.pop()

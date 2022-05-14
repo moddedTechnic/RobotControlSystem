@@ -15,6 +15,8 @@ sys.path.insert(1, os.fspath(__directory__.parent))
 import unittest
 
 from library.interpreter import evaluate
+from library.interpreter.parse import Parser
+from library.interpreter.variables import Integer, Type, Variable, Undefined
 
 
 class ArithmeticTestCase(unittest.TestCase):
@@ -133,6 +135,32 @@ class ArithmeticTestCase(unittest.TestCase):
         self.assertEqual((2, 1), evaluate('2.0 / 1.0;').as_tuple())
         self.assertEqual((2, 1), evaluate('2 / 1.0;').as_tuple())
         self.assertEqual((2, 1), evaluate('2.0 / 1;').as_tuple())
+
+    def test_variable_declaration(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int x;', parser=parser)
+            self.assertIn('x', parser.context)
+            self.assertIs(parser.context['x'], Undefined)
+
+        with parser.context:
+            evaluate('int y = 5;', parser=parser)
+            self.assertIn('y', parser.context)
+            self.assertIsInstance(parser.context['y'], Integer)
+            self.assertEqual(parser.context['y'].value, 5)
+
+    def test_variable_definition(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int x;', parser=parser)
+            evaluate('x = 5;', parser=parser)
+            self.assertIn('x', parser.context)
+            self.assertIsInstance(parser.context['x'], Integer)
+            self.assertEqual(parser.context['x'].value, 5)
 
 
 if __name__ == '__main__':
