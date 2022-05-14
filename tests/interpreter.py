@@ -16,7 +16,7 @@ import unittest
 
 from library.interpreter import evaluate
 from library.interpreter.parse import Parser
-from library.interpreter.variables import Integer, Type, Variable, Undefined
+from library.interpreter.variables import Integer, Type, Variable, Undefined, Rational
 
 
 class ArithmeticTestCase(unittest.TestCase):
@@ -178,13 +178,23 @@ class ArithmeticTestCase(unittest.TestCase):
 
     def test_weird_variables(self) -> None:
         parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
+        parser.context.push({
+            'int': Variable(Integer, Type, True),
+            'rational': Variable(Rational, Type, True)
+        })
 
         with parser.context:
             evaluate('int 0 = 1;', parser=parser)
             _0 = evaluate('0;', parser=parser)
             self.assertIsInstance(_0, Integer)
             self.assertEqual(1, _0.value)
+
+        with parser.context:
+            evaluate('int three = 3;', parser=parser)
+            evaluate('rational pi = three.14;', parser=parser)
+            pi = evaluate('pi;', parser=parser)
+            self.assertIsInstance(pi, Rational)
+            self.assertEqual((157, 50), pi.as_tuple())
 
 
 if __name__ == '__main__':
