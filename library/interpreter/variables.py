@@ -2,7 +2,11 @@
 
 __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
-__all__ = ['Integer', 'Rational', 'Context', 'Undefined', 'Type', 'Value', 'Variable']
+__all__ = [
+    'Integer', 'Rational', 'Context',
+    'Type', 'Value', 'Variable', 'Boolean',
+    'null', 'undefined', 'false', 'true',
+]
 
 from dataclasses import dataclass
 from typing import Any, Union, Optional, Callable, Type as PyType
@@ -26,17 +30,28 @@ class Type(Value):
         super().__init__(Type, value)
 
 
-class _Undefined(Value):
+class Undefined(Value):
     """Used to mark that a name has no value"""
 
     def __init__(self) -> None:
-        self.typ = _Undefined
+        super().__init__(type(self), None)
 
     def __repr__(self) -> str:
         return f'undefined'
 
 
-Undefined = _Undefined()
+class Null(Value):
+    """Used to mark that a name has no value"""
+
+    def __init__(self) -> None:
+        super().__init__(type(self), None)
+
+    def __repr__(self) -> str:
+        return f'null'
+
+
+undefined = Undefined()
+null = Null()
 
 
 class Signature:
@@ -71,6 +86,7 @@ class Rational(Value):
     """Represents a rational number"""
 
     def __init__(self, numerator: int, denominator: int):
+        super().__init__(type(self), None)
         gcd = maths.gcd(numerator, denominator)
         self.numerator = numerator // gcd
         self.denominator = denominator // gcd
@@ -170,7 +186,7 @@ class Integer(Value):
                 if c != '0':
                     break
                 self.leading_zeros += 1
-        self.value = int(value)
+        super().__init__(type(self), int(value))
 
     def __repr__(self) -> str:
         return str(self.value)
@@ -210,6 +226,17 @@ class Integer(Value):
         return Rational(self.value * (10 ** x) + other.value, 10 ** x)
 
 
+class Boolean(Value):
+    """Represents a boolean value"""
+
+    def __init__(self, value: bool):
+        super().__init__(type(self), value)
+
+
+true = Boolean(True)
+false = Boolean(False)
+
+
 @dataclass
 class Variable:
     """Represents a variable in the context"""
@@ -230,7 +257,7 @@ class Context:
 
     def __getitem__(self, name: str) -> Value:
         for frame in reversed(self.stack):
-            if name in frame and frame[name] is not Undefined:
+            if name in frame and frame[name] is not undefined:
                 return frame[name].value
         raise NameError(f'"{name}" was not defined')
 
@@ -253,7 +280,7 @@ class Context:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.pop()
 
-    def declare(self, name: str, typ: type | Type, value: Value = Undefined) -> None:
+    def declare(self, name: str, typ: type | Type, value: Value = undefined) -> None:
         """Declare a variable in the top-most stack frame"""
         self.stack[-1][name] = Variable(value, typ)
 

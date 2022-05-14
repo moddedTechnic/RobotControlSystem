@@ -16,7 +16,7 @@ import unittest
 
 from library.interpreter import evaluate
 from library.interpreter.parse import Parser
-from library.interpreter.variables import Integer, Type, Variable, Undefined, Rational
+from library.interpreter.variables import Integer, Type, Variable, undefined, Rational, Boolean, Undefined, Null, null
 
 
 class ArithmeticTestCase(unittest.TestCase):
@@ -143,7 +143,7 @@ class ArithmeticTestCase(unittest.TestCase):
         with parser.context:
             evaluate('int x;', parser=parser)
             self.assertIn('x', parser.context)
-            self.assertIs(parser.context['x'], Undefined)
+            self.assertIs(parser.context['x'], undefined)
 
         with parser.context:
             evaluate('int y = 5;', parser=parser)
@@ -175,6 +175,31 @@ class ArithmeticTestCase(unittest.TestCase):
         with parser.context:
             with self.assertRaises(NameError):
                 evaluate('y;', parser=parser)
+
+    def test_boolean_variables(self) -> None:
+        parser = Parser()
+        parser.context.push({
+            'bool': Variable(Boolean, Type, True),
+        })
+
+        with parser.context:
+            true = evaluate('true;', parser=parser)
+            self.assertIsInstance(true, Boolean)
+            self.assertIs(true.value, True)
+
+        with parser.context:
+            false = evaluate('false;', parser=parser)
+            self.assertIsInstance(false, Boolean)
+            self.assertIs(false.value, False)
+
+    def test_nullish_variables(self) -> None:
+        _undefined = evaluate('undefined;')
+        self.assertIsInstance(_undefined, Undefined)
+        self.assertIs(_undefined, undefined)
+
+        _null = evaluate('null;')
+        self.assertIsInstance(_null, Null)
+        self.assertIs(_null, null)
 
     def test_weird_variables(self) -> None:
         parser = Parser()

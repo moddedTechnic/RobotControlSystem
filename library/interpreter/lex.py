@@ -46,10 +46,10 @@ class Lexer(_Lexer):
     KWD_FINAL = r'final'
     KWD_NONLOCAL = r'nonlocal'
 
-    TRUE = r'true'
-    FALSE = r'false'
-    NULL = r'null'
-    UNDEFINED = r'undefined'
+    # TRUE = r'true'
+    # FALSE = r'false'
+    # NULL = r'null'
+    # UNDEFINED = r'undefined'
 
     PLUS = r'\+'
     MINUS = r'-'

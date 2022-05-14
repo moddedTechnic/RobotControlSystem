@@ -9,7 +9,7 @@ from typing import Iterable
 from dependencies.sly.sly import Parser as _Parser
 
 from .lex import Lexer, Token
-from .variables import Integer, Context, Type, Value
+from .variables import Integer, Context, Type, Value, undefined, false, true, null
 
 
 def _do_binary_operator(name: str, op: str, a, b):
@@ -129,6 +129,14 @@ class Parser(_Parser):
         except NameError:
             if name.isdigit():
                 return Integer(name)
+            if name == 'true':
+                return true
+            if name == 'false':
+                return false
+            if name == 'null':
+                return null
+            if name == 'undefined':
+                return undefined
             raise
 
 
