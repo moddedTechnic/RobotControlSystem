@@ -27,7 +27,6 @@ class Lexer(_Lexer):
         KWD_CLASS,
         KWD_AUTO, KWD_CONST, KWD_FINAL,
         KWD_NONLOCAL,
-        TRUE, FALSE, NULL, UNDEFINED,
     }
 
     ignore = ' \t'
@@ -45,11 +44,6 @@ class Lexer(_Lexer):
     KWD_CONST = r'const'
     KWD_FINAL = r'final'
     KWD_NONLOCAL = r'nonlocal'
-
-    # TRUE = r'true'
-    # FALSE = r'false'
-    # NULL = r'null'
-    # UNDEFINED = r'undefined'
 
     PLUS = r'\+'
     MINUS = r'-'

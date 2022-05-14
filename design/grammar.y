@@ -13,7 +13,9 @@
 
 %%
 
-entry: statement;
+program   : program statement
+          | statement
+          ;
 
 statement : IDENTIFIER IDENTIFIER '=' expr ';'
           | IDENTIFIER IDENTIFIER ';'
