@@ -11,12 +11,6 @@
 %token KWD_FINAL
 %token KWD_NONLOCAL
 
-%token TRUE
-%token FALSE
-%token NULL
-%token UNDEFINED
-
-
 %%
 
 entry: statement;
