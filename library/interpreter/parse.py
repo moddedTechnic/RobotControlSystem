@@ -54,6 +54,16 @@ class Parser(_Parser):
     def __init__(self) -> None:
         self.context = Context()
 
+    @_('statement')
+    def program(self, p):
+        """A program made of a single statement"""
+        return [p.statement]
+
+    @_('program statement')
+    def program(self, p):
+        """A program made of more than one statement"""
+        return p.program + [p.statement]
+
     @_('IDENTIFIER IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Declare a variable"""
