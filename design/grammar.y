@@ -1,51 +1,41 @@
 
-%token NAME
-%token NUMBER
+%token IDENTIFIER
 
-%token KEYWORD_FOR
-%token KEYWORD_WHILE
-%token KEYWORD_IF
-%token KEYWORD_CLASS
+%token KWD_FOR
+%token KWD_WHILE
+%token KWD_IF
+%token KWD_CLASS
+
+%token KWD_AUTO
+%token KWD_CONST
+%token KWD_FINAL
+%token KWD_NONLOCAL
+
+%token TRUE
+%token FALSE
+%token NULL
+%token UNDEFINED
+
 
 %%
 
 entry: statement;
 
-block: '{' statements '}';
+statement : IDENTIFIER IDENTIFIER '=' expr ';'
+          | IDENTIFIER IDENTIFIER ';'
+          | IDENTIFIER '=' expr ';'
+          | expr ';'
+          ;
 
-statement: for_loop | variable_assign | expression;
-statements: statement | statements ';' statement
-
-variable_assign: NAME '=' expression;
-
-for_loop: KEYWORD_FOR '('
-              variable_assign ';' for_loop_compare ';'
-              for_loop_update
-          ')' block;
-
-for_loop_compare: NAME for_loop_compare_op expression;
-for_loop_update: NAME for_loop_update_op expression;
-
-for_loop_compare_op: '<' | '<''='
-                   | '>' | '>''='
-                   | '=''=' | '!''=';
-for_loop_update_op: '+''=' | '-''='
-                  | '*''=' | '/''=' | '%''=';
-
-expression: term '+' term
-          | term '-' term;
-
-term: factor '*' factor
-    | factor '/' factor
-    | factor '%' factor;
-
-factor: '(' expression ')'
-      | NUMBER
-      | variable
-      | '+' factor
-      | '-' factor;
-
-variable: NAME | NAME '(' parameters ')' | NAME '(' ')'
-parameters: expression | expression ',' parameters
+expr      : expr '.' expr
+          | expr '+' expr
+          | expr '-' expr
+          | expr '*' expr
+          | expr '/' expr
+          | '+' expr
+          | '-' expr
+          | '(' expr ')'
+          | IDENTIFIER
+          ;
 
 %%

@@ -54,7 +54,7 @@ class Parser(_Parser):
     def __init__(self) -> None:
         self.context = Context()
 
-    @_('IDENTIFIER IDENTIFIER ASSIGN expr SEMI')
+    @_('IDENTIFIER IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Declare a variable"""
         typ = self.context[p.IDENTIFIER0]
@@ -70,7 +70,7 @@ class Parser(_Parser):
             raise TypeError(f'Cannot create a variable of type "{typ}" - it is not a type')
         self.context.declare(p.IDENTIFIER1, typ)
 
-    @_('IDENTIFIER ASSIGN expr SEMI')
+    @_('IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Assign a value to a variable"""
         self.context[p.IDENTIFIER] = p.expr

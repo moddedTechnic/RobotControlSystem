@@ -20,7 +20,7 @@ class Lexer(_Lexer):
     tokens = {
         IDENTIFIER,
         PLUS, MINUS, STAR, SLASH, PERIOD,
-        ASSIGN,
+        EQUALS,
         LPAREN, RPAREN,
         SEMI,
         KWD_FOR, KWD_WHILE, KWD_IF,
@@ -55,7 +55,7 @@ class Lexer(_Lexer):
     MINUS = r'-'
     STAR = r'\*'
     SLASH = r'/'
-    ASSIGN = r'='
+    EQUALS = r'='
     LPAREN = r'\('
     RPAREN = r'\)'
     PERIOD = r'\.'
