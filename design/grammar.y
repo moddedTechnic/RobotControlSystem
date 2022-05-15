@@ -24,6 +24,7 @@ statement : IDENTIFIER IDENTIFIER '=' expr ';'
           | KWD_CONST KWD_AUTO IDENTIFIER '=' expr ';'
           | IDENTIFIER '=' expr ';'
           | expr ';'
+          | '{' program '}'
           ;
 
 expr      : expr '.' expr

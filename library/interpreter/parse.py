@@ -108,6 +108,11 @@ class Parser(_Parser):
         """A statement which is just an expression"""
         return p.expr
 
+    @_('LBRACE program RBRACE')
+    def statement(self, p) -> list:
+        """Represents a block of statements"""
+        return p.program
+
     @_('expr PERIOD expr')
     def expr(self, p):
         """Dot expressions"""

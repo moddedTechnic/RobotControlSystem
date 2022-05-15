@@ -21,7 +21,7 @@ class Lexer(_Lexer):
         IDENTIFIER,
         PLUS, MINUS, STAR, SLASH, PERIOD,
         EQUALS,
-        LPAREN, RPAREN,
+        LPAREN, RPAREN, LBRACE, RBRACE,
         SEMI,
         KWD_FOR, KWD_WHILE, KWD_IF,
         KWD_CLASS,
@@ -50,10 +50,13 @@ class Lexer(_Lexer):
     STAR = r'\*'
     SLASH = r'/'
     EQUALS = r'='
-    LPAREN = r'\('
-    RPAREN = r'\)'
     PERIOD = r'\.'
     SEMI = r';'
+
+    LPAREN = r'\('
+    RPAREN = r'\)'
+    LBRACE = r'\{'
+    RBRACE = r'\}'
 
     def ignore_newline(self, t: Token) -> None:
         """Increment the line number for each new line encountered"""
