@@ -5,6 +5,7 @@ __version__ = '0.1'
 __all__ = [
     'Integer', 'Rational', 'Context',
     'Type', 'Value', 'Variable', 'Boolean',
+    'Undefined', 'Null',
     'null', 'undefined', 'false', 'true',
 ]
 
@@ -256,6 +257,36 @@ class Integer(Value):
         return Rational(self.value * (10 ** x) + other.value, 10 ** x)
 
     @Function.from_native
+    def operator_less(self, other: 'Integer') -> 'Boolean':
+        """Implement the `<` operator"""
+        return Boolean(self.value < other.value)
+
+    @Function.from_native
+    def operator_less_equal(self, other: 'Integer') -> 'Boolean':
+        """Implement the `<=` operator"""
+        return Boolean(self.value <= other.value)
+
+    @Function.from_native
+    def operator_greater(self, other: 'Integer') -> 'Boolean':
+        """Implement the `>` operator"""
+        return Boolean(self.value > other.value)
+
+    @Function.from_native
+    def operator_greater_equal(self, other: 'Integer') -> 'Boolean':
+        """Implement the `>=` operator"""
+        return Boolean(self.value >= other.value)
+
+    @Function.from_native
+    def operator_equality(self, other: 'Integer') -> 'Boolean':
+        """Implement the `==` operator"""
+        return Boolean(self.value == other.value)
+
+    @Function.from_native
+    def operator_nonequality(self, other: 'Integer') -> 'Boolean':
+        """Implement the `!=` operator"""
+        return Boolean(self.value != other.value)
+
+    @Function.from_native
     def unary_operator_increment(self) -> 'Integer':
         """Implement the `++` operator"""
         return Integer(self.value + 1)
@@ -291,6 +322,9 @@ class Boolean(Value):
 
     def __init__(self, value: bool):
         super().__init__(type(self), value)
+
+    def __eq__(self, other: 'Boolean') -> bool:
+        return self.value is other.value
 
 
 true = Boolean(True)

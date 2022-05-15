@@ -28,6 +28,22 @@ def _do_binary_operator(name: str, op: str, a, b):
     )
 
 
+def _do_comparison_operator(name: str, back_name: str, op: str, a, b):
+    handler_name = f'operator_{name}'
+    if hasattr(a, handler_name):
+        handler = getattr(a, handler_name)
+        if (result := handler.call(a, b)) is not NotImplemented:
+            return result
+    back_handler_name = f'operator_{back_name}'
+    if hasattr(b, back_handler_name):
+        back_handler = getattr(b, back_handler_name)
+        if (result := back_handler.call(b, a)) is not NotImplemented:
+            return result
+    raise TypeError(
+        f'unsupported operand type(s) for {op}: "{type(a).__name__}" and "{type(b).__name__}"'
+    )
+
+
 def _do_assignment_operator(name: str, op: str, a, b):
     handler_name = f'assignment_operator_{name}'
     if hasattr(a, handler_name):
@@ -56,6 +72,7 @@ class Parser(_Parser):
     tokens = Lexer.tokens
 
     precedence = (
+        ('left', LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUALITY, NONEQUALITY, IDENTITY),
         ('left', PLUS, MINUS),
         ('left', STAR, SLASH),
         ('right', UMINUS, UPLUS),
@@ -69,12 +86,12 @@ class Parser(_Parser):
     @_('statement')
     def program(self, p):
         """A program made of a single statement"""
-        return [p.statement]
+        return p.statement,
 
     @_('program statement')
     def program(self, p):
         """A program made of more than one statement"""
-        return p.program + [p.statement]
+        return *p.program, p.statement
 
     @_('IDENTIFIER IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
@@ -159,6 +176,46 @@ class Parser(_Parser):
     def expr(self, p):
         """Dot expressions are expressions"""
         return p.access_expr
+
+    @_('expr LESS expr')
+    def logic_expr(self, p):
+        """a < b"""
+        return _do_comparison_operator('less', 'greater', '<', p.expr0, p.expr1)
+
+    @_('expr LESS_EQUAL expr')
+    def logic_expr(self, p):
+        """a <= b"""
+        return _do_comparison_operator('less_equal', 'greater_equal', '<=', p.expr0, p.expr1)
+
+    @_('expr GREATER expr')
+    def logic_expr(self, p):
+        """a > b"""
+        return _do_comparison_operator('greater', 'less', '>', p.expr0, p.expr1)
+
+    @_('expr GREATER_EQUAL expr')
+    def logic_expr(self, p):
+        """a >= b"""
+        return _do_comparison_operator('greater_equal', 'less_equal', '>=', p.expr0, p.expr1)
+
+    @_('expr EQUALITY expr')
+    def logic_expr(self, p):
+        """a == b"""
+        return _do_comparison_operator('equality', 'equality', '==', p.expr0, p.expr1)
+
+    @_('expr NONEQUALITY expr')
+    def logic_expr(self, p):
+        """a != b"""
+        return _do_comparison_operator('nonequality', 'nonequality', '!=', p.expr0, p.expr1)
+
+    @_('expr IDENTITY expr')
+    def logic_expr(self, p):
+        """a is b"""
+        return _do_comparison_operator('identity', 'identity', 'is', p.expr0, p.expr1)
+
+    @_('logic_expr')
+    def expr(self, p):
+        """Dot expressions are expressions"""
+        return p.logic_expr
 
     @_('expr PLUS expr')
     def expr(self, p):

@@ -21,8 +21,9 @@ class Lexer(_Lexer):
         IDENTIFIER,
         INCREMENT, DECREMENT,
         PLUS_EQUALS, MINUS_EQUALS, STAR_EQUALS, SLASH_EQUALS,
-        PLUS, MINUS, STAR, SLASH, PERIOD,
-        EQUALS,
+        PLUS, MINUS, STAR, SLASH,
+        LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUALITY, NONEQUALITY, IDENTITY,
+        PERIOD, EQUALS,
         LPAREN, RPAREN, LBRACE, RBRACE,
         SEMI,
         KWD_FOR, KWD_WHILE, KWD_IF,
@@ -59,6 +60,15 @@ class Lexer(_Lexer):
     MINUS = r'-'
     STAR = r'\*'
     SLASH = r'/'
+
+    LESS_EQUAL = r'<='
+    LESS = r'<'
+    GREATER_EQUAL = r'>='
+    GREATER = r'>'
+    EQUALITY = r'=='
+    NONEQUALITY = r'!='
+    IDENTITY = r'is'
+
     EQUALS = r'='
     PERIOD = r'\.'
     SEMI = r';'

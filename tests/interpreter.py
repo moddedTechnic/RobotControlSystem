@@ -16,7 +16,12 @@ import unittest
 
 from library.interpreter import evaluate
 from library.interpreter.parse import Parser
-from library.interpreter.variables import Integer, Type, Variable, undefined, Rational, Boolean, Undefined, Null, null
+from library.interpreter.variables import (
+    Variable,
+    Type, Integer, Rational,
+    Undefined, Null, Boolean,
+    null, undefined, true, false,
+)
 
 
 class ArithmeticTestCase(unittest.TestCase):
@@ -183,14 +188,14 @@ class ArithmeticTestCase(unittest.TestCase):
         })
 
         with parser.context:
-            true = evaluate('true;', parser=parser)[0]
-            self.assertIsInstance(true, Boolean)
-            self.assertIs(true.value, True)
+            _true = evaluate('true;', parser=parser)[0]
+            self.assertIsInstance(_true, Boolean)
+            self.assertIs(_true.value, True)
 
         with parser.context:
-            false = evaluate('false;', parser=parser)[0]
-            self.assertIsInstance(false, Boolean)
-            self.assertIs(false.value, False)
+            _false = evaluate('false;', parser=parser)[0]
+            self.assertIsInstance(_false, Boolean)
+            self.assertIs(_false.value, False)
 
     def test_nullish_variables(self) -> None:
         _undefined = evaluate('undefined;')[0]
@@ -363,6 +368,41 @@ class ArithmeticTestCase(unittest.TestCase):
             y = evaluate('y /= 2; y;', parser=parser)[1]
             self.assertIsInstance(y, Rational)
             self.assertEqual((1, 4), y.as_tuple())
+
+    def test_comparison_operators(self) -> None:
+        def _check(value, expect):
+            self.assertIsInstance(value, Boolean)
+            self.assertEqual(value, expect)
+
+        less_1, less_2, less_3 = evaluate('0 < 1; 0 < 0; 1 < 0;')
+        _check(less_1, true)
+        _check(less_2, false)
+        _check(less_3, false)
+
+        less_equal_1, less_equal_2, less_equal_3 = evaluate('0 <= 1; 0 <= 0; 1 <= 0;')
+        _check(less_equal_1, true)
+        _check(less_equal_2, true)
+        _check(less_equal_3, false)
+
+        greater_1, greater_2, greater_3 = evaluate('0 > 1; 0 > 0; 1 > 0;')
+        _check(greater_1, false)
+        _check(greater_2, false)
+        _check(greater_3, true)
+
+        greater_equal_1, greater_equal_2, greater_equal_3 = evaluate('0 >= 1; 0 >= 0; 1 >= 0;')
+        _check(greater_equal_1, false)
+        _check(greater_equal_2, true)
+        _check(greater_equal_3, true)
+
+        equality_1, equality_2, equality_3 = evaluate('0 == 1; 1 == 1; 1 == 0;')
+        _check(equality_1, false)
+        _check(equality_2, true)
+        _check(equality_3, false)
+
+        nonequality_1, nonequality_2, nonequality_3 = evaluate('0 != 1; 1 != 1; 1 != 0;')
+        _check(nonequality_1, true)
+        _check(nonequality_2, false)
+        _check(nonequality_3, true)
 
 
 if __name__ == '__main__':
