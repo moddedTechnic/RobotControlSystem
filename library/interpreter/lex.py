@@ -24,7 +24,7 @@ class Lexer(_Lexer):
         PLUS, MINUS, STAR, SLASH,
         LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUALITY, NONEQUALITY, IDENTITY,
         PERIOD, EQUALS,
-        LPAREN, RPAREN, LBRACE, RBRACE,
+        LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
         SEMI,
         KWD_FOR, KWD_WHILE, KWD_IF,
         KWD_CLASS,
@@ -73,10 +73,10 @@ class Lexer(_Lexer):
     PERIOD = r'\.'
     SEMI = r';'
 
-    LPAREN = r'\('
-    RPAREN = r'\)'
-    LBRACE = r'\{'
-    RBRACE = r'\}'
+    LEFT_PAREN = r'\('
+    RIGHT_PAREN = r'\)'
+    LEFT_BRACE = r'\{'
+    RIGHT_BRACE = r'\}'
 
     def ignore_newline(self, t: Token) -> None:
         """Increment the line number for each new line encountered"""

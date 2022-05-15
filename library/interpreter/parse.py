@@ -75,7 +75,7 @@ class Parser(_Parser):
         ('left', LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUALITY, NONEQUALITY, IDENTITY),
         ('left', PLUS, MINUS),
         ('left', STAR, SLASH),
-        ('right', UMINUS, UPLUS),
+        ('right', UNARY_MINUS, UNARY_PLUS),
         ('right', INCREMENT, DECREMENT),
         ('left', PERIOD),
     )
@@ -142,7 +142,7 @@ class Parser(_Parser):
         """A statement which is just an expression"""
         return p.expr
 
-    @_('LBRACE program RBRACE')
+    @_('LEFT_BRACE program RIGHT_BRACE')
     def statement(self, p) -> list:
         """Represents a block of statements"""
         return p.program
@@ -251,17 +251,17 @@ class Parser(_Parser):
         self.context[name] = _do_unary_operator('decrement', '--', self.context[name])
         return self.context[name]
 
-    @_('PLUS expr %prec UPLUS')
+    @_('PLUS expr %prec UNARY_PLUS')
     def expr(self, p):
         """Unary plus expressions"""
         return _do_unary_operator('plus', '+', p.expr)
 
-    @_('MINUS expr %prec UMINUS')
+    @_('MINUS expr %prec UNARY_MINUS')
     def expr(self, p):
         """Unary minus expressions"""
         return _do_unary_operator('minus', '-', p.expr)
 
-    @_('LPAREN expr RPAREN')
+    @_('LEFT_PAREN expr RIGHT_PAREN')
     def expr(self, p):
         """Bracketed expressions"""
         return p.expr
