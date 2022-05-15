@@ -238,6 +238,48 @@ class ArithmeticTestCase(unittest.TestCase):
             self.assertIsInstance(pi, Rational)
             self.assertEqual((157, 50), pi.as_tuple())
 
+    def test_increment(self) -> None:
+        parser = Parser()
+
+        with parser.context:
+            evaluate('auto x = 0;', parser=parser)
+            x = evaluate('x++;', parser=parser)[0]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(1, x.value)
+            x = evaluate('x++;', parser=parser)[0]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(2, x.value)
+
+        with parser.context:
+            evaluate('auto y = 0.0;', parser=parser)
+            y = evaluate('y++;', parser=parser)[0]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((1, 1), y.as_tuple())
+            y = evaluate('y++;', parser=parser)[0]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((2, 1), y.as_tuple())
+
+    def test_decrement(self) -> None:
+        parser = Parser()
+
+        with parser.context:
+            evaluate('auto x = 0;', parser=parser)
+            x = evaluate('x--;', parser=parser)[0]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(-1, x.value)
+            x = evaluate('x--;', parser=parser)[0]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(-2, x.value)
+
+        with parser.context:
+            evaluate('auto y = 0.0;', parser=parser)
+            y = evaluate('y--;', parser=parser)[0]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((-1, 1), y.as_tuple())
+            y = evaluate('y--;', parser=parser)[0]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((-2, 1), y.as_tuple())
+
 
 if __name__ == '__main__':
     unittest.main()

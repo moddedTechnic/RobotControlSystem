@@ -19,6 +19,7 @@ class Lexer(_Lexer):
 
     tokens = {
         IDENTIFIER,
+        INCREMENT, DECREMENT,
         PLUS, MINUS, STAR, SLASH, PERIOD,
         EQUALS,
         LPAREN, RPAREN, LBRACE, RBRACE,
@@ -44,6 +45,9 @@ class Lexer(_Lexer):
     KWD_NONLOCAL = r'nonlocal'
 
     IDENTIFIER = r'[a-zA-Z0-9_]+'
+
+    INCREMENT = r'\+\+'
+    DECREMENT = r'--'
 
     PLUS = r'\+'
     MINUS = r'-'

@@ -161,6 +161,16 @@ class Rational(Value):
         return self.operator_star.call(self.reciprocal.call(self), other)
 
     @Function.from_native
+    def unary_operator_increment(self) -> 'Rational':
+        """Implement the `++` operator"""
+        return Rational(self.numerator + self.denominator, self.denominator)
+
+    @Function.from_native
+    def unary_operator_decrement(self) -> 'Rational':
+        """Implement the `--` operator"""
+        return Rational(self.numerator - self.denominator, self.denominator)
+
+    @Function.from_native
     def unary_operator_plus(self) -> 'Rational':
         """Implement unary plus for rational numbers"""
         return Rational(self.numerator, self.denominator)
@@ -224,6 +234,16 @@ class Integer(Value):
         """Override the dot operator for integers"""
         x = len(str(other)) + other.leading_zeros
         return Rational(self.value * (10 ** x) + other.value, 10 ** x)
+
+    @Function.from_native
+    def unary_operator_increment(self) -> 'Integer':
+        """Implement the `++` operator"""
+        return Integer(self.value + 1)
+
+    @Function.from_native
+    def unary_operator_decrement(self) -> 'Integer':
+        """Implement the `--` operator"""
+        return Integer(self.value - 1)
 
 
 class Boolean(Value):

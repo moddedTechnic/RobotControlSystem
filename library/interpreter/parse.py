@@ -48,6 +48,7 @@ class Parser(_Parser):
         ('left', PLUS, MINUS),
         ('left', STAR, SLASH),
         ('right', UMINUS, UPLUS),
+        ('right', INCREMENT, DECREMENT),
         ('left', PERIOD),
     )
 
@@ -114,9 +115,14 @@ class Parser(_Parser):
         return p.program
 
     @_('expr PERIOD expr')
-    def expr(self, p):
+    def access_expr(self, p):
         """Dot expressions"""
         return p.expr0.operator_dot.call(p.expr0, p.expr1)
+
+    @_('access_expr')
+    def expr(self, p):
+        """Dot expressions are expressions"""
+        return p.access_expr
 
     @_('expr PLUS expr')
     def expr(self, p):
@@ -137,6 +143,20 @@ class Parser(_Parser):
     def expr(self, p):
         """Slash expressions"""
         return _do_binary_operator('slash', '/', p.expr0, p.expr1)
+
+    @_('IDENTIFIER INCREMENT')
+    def expr(self, p):
+        """Increment expressions"""
+        name = p.IDENTIFIER
+        self.context[name] = _do_unary_operator('increment', '++', self.context[name])
+        return self.context[name]
+
+    @_('IDENTIFIER DECREMENT')
+    def expr(self, p):
+        """Increment expressions"""
+        name = p.IDENTIFIER
+        self.context[name] = _do_unary_operator('decrement', '--', self.context[name])
+        return self.context[name]
 
     @_('PLUS expr %prec UPLUS')
     def expr(self, p):
