@@ -20,6 +20,7 @@ class Lexer(_Lexer):
     tokens = {
         IDENTIFIER,
         INCREMENT, DECREMENT,
+        PLUS_EQUALS, MINUS_EQUALS, STAR_EQUALS, SLASH_EQUALS,
         PLUS, MINUS, STAR, SLASH, PERIOD,
         EQUALS,
         LPAREN, RPAREN, LBRACE, RBRACE,
@@ -48,6 +49,11 @@ class Lexer(_Lexer):
 
     INCREMENT = r'\+\+'
     DECREMENT = r'--'
+
+    PLUS_EQUALS = r'\+='
+    MINUS_EQUALS = r'-='
+    STAR_EQUALS = r'\*='
+    SLASH_EQUALS = r'/='
 
     PLUS = r'\+'
     MINUS = r'-'

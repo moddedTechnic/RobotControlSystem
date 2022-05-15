@@ -280,6 +280,90 @@ class ArithmeticTestCase(unittest.TestCase):
             self.assertIsInstance(y, Rational)
             self.assertEqual((-2, 1), y.as_tuple())
 
+    def test_plus_equals(self) -> None:
+        parser = Parser()
+
+        with parser.context:
+            evaluate('auto x = 0;', parser=parser)
+            x = evaluate('x += 2; x;', parser=parser)[1]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(2, x.value)
+            x = evaluate('x += 2; x;', parser=parser)[1]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(4, x.value)
+
+        with parser.context:
+            evaluate('auto y = 0.0;', parser=parser)
+            y = evaluate('y += 2; y;', parser=parser)[1]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((2, 1), y.as_tuple())
+            y = evaluate('y += 2; y;', parser=parser)[1]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((4, 1), y.as_tuple())
+
+    def test_minus_equals(self) -> None:
+        parser = Parser()
+
+        with parser.context:
+            evaluate('auto x = 0;', parser=parser)
+            x = evaluate('x -= 2; x;', parser=parser)[1]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(-2, x.value)
+            x = evaluate('x -= 2; x;', parser=parser)[1]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(-4, x.value)
+
+        with parser.context:
+            evaluate('auto y = 0.0;', parser=parser)
+            y = evaluate('y -= 2; y;', parser=parser)[1]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((-2, 1), y.as_tuple())
+            y = evaluate('y -= 2; y;', parser=parser)[1]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((-4, 1), y.as_tuple())
+
+    def test_star_equals(self) -> None:
+        parser = Parser()
+
+        with parser.context:
+            evaluate('auto x = 1;', parser=parser)
+            x = evaluate('x *= 2; x;', parser=parser)[1]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(2, x.value)
+            x = evaluate('x *= 2; x;', parser=parser)[1]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(4, x.value)
+
+        with parser.context:
+            evaluate('auto y = 1.0;', parser=parser)
+            y = evaluate('y *= 0.5; y;', parser=parser)[1]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((1, 2), y.as_tuple())
+            y = evaluate('y *= 0.5; y;', parser=parser)[1]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((1, 4), y.as_tuple())
+
+    def test_slash_equals(self) -> None:
+        parser = Parser()
+
+        with parser.context:
+            evaluate('auto x = 4;', parser=parser)
+            x = evaluate('x /= 2; x;', parser=parser)[1]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(2, x.value)
+            x = evaluate('x /= 2; x;', parser=parser)[1]
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(1, x.value)
+
+        with parser.context:
+            evaluate('auto y = 1.0;', parser=parser)
+            y = evaluate('y /= 2; y;', parser=parser)[1]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((1, 2), y.as_tuple())
+            y = evaluate('y /= 2; y;', parser=parser)[1]
+            self.assertIsInstance(y, Rational)
+            self.assertEqual((1, 4), y.as_tuple())
+
 
 if __name__ == '__main__':
     unittest.main()

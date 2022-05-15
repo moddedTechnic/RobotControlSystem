@@ -181,6 +181,26 @@ class Rational(Value):
         return Rational(-self.numerator, self.denominator)
 
     @Function.from_native
+    def assignment_operator_plus(self, other: 'Integer | Rational') -> 'Rational':
+        """Implement the `+=` operator"""
+        return self.operator_plus.call(self, other)
+
+    @Function.from_native
+    def assignment_operator_minus(self, other: 'Integer | Rational') -> 'Rational':
+        """Implement the `-=` operator"""
+        return self.operator_minus.call(self, other)
+
+    @Function.from_native
+    def assignment_operator_star(self, other: 'Integer | Rational') -> 'Rational':
+        """Implement the `*=` operator"""
+        return self.operator_star.call(self, other)
+
+    @Function.from_native
+    def assignment_operator_slash(self, other: 'Integer | Rational') -> 'Rational':
+        """Implement the `/=` operator"""
+        return self.operator_slash.call(self, other)
+
+    @Function.from_native
     def reciprocal(self) -> 'Rational':
         """Calculate the reciprocal of the number"""
         return Rational(self.denominator, self.numerator)
@@ -244,6 +264,26 @@ class Integer(Value):
     def unary_operator_decrement(self) -> 'Integer':
         """Implement the `--` operator"""
         return Integer(self.value - 1)
+
+    @Function.from_native
+    def assignment_operator_plus(self, other: 'Integer | Rational') -> 'Integer':
+        """Implement the `+=` operator"""
+        return Integer(self.value + other.value)
+
+    @Function.from_native
+    def assignment_operator_minus(self, other: 'Integer | Rational') -> 'Integer':
+        """Implement the `-=` operator"""
+        return Integer(self.value - other.value)
+
+    @Function.from_native
+    def assignment_operator_star(self, other: 'Integer | Rational') -> 'Integer':
+        """Implement the `*=` operator"""
+        return Integer(self.value * other.value)
+
+    @Function.from_native
+    def assignment_operator_slash(self, other: 'Integer | Rational') -> 'Integer':
+        """Implement the `/=` operator"""
+        return Integer(self.value / other.value)
 
 
 class Boolean(Value):

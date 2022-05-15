@@ -28,6 +28,17 @@ def _do_binary_operator(name: str, op: str, a, b):
     )
 
 
+def _do_assignment_operator(name: str, op: str, a, b):
+    handler_name = f'assignment_operator_{name}'
+    if hasattr(a, handler_name):
+        handler = getattr(a, handler_name)
+        if (result := handler.call(a, b)) is not NotImplemented:
+            return result
+    raise TypeError(
+        f'unsupported operand type(s) for {op}=: "{type(a).__name__}" and "{type(b).__name__}"'
+    )
+
+
 def _do_unary_operator(name: str, op: str, a):
     handler_name = f'unary_operator_{name}'
     if hasattr(a, handler_name):
@@ -104,6 +115,11 @@ class Parser(_Parser):
         """Assign a value to a variable"""
         self.context[p.IDENTIFIER] = p.expr
 
+    @_('operator_assign SEMI')
+    def statement(self, p):
+        """Assignment operators such as `+=`"""
+        return p.operator_assign
+
     @_('expr SEMI')
     def statement(self, p):
         """A statement which is just an expression"""
@@ -113,6 +129,26 @@ class Parser(_Parser):
     def statement(self, p) -> list:
         """Represents a block of statements"""
         return p.program
+
+    @_('IDENTIFIER PLUS_EQUALS expr')
+    def operator_assign(self, p):
+        """The `+=` operator"""
+        self.context[p.IDENTIFIER] = _do_assignment_operator('plus', '+', self.context[p.IDENTIFIER], p.expr)
+
+    @_('IDENTIFIER MINUS_EQUALS expr')
+    def operator_assign(self, p):
+        """The `-=` operator"""
+        self.context[p.IDENTIFIER] = _do_assignment_operator('minus', '-', self.context[p.IDENTIFIER], p.expr)
+
+    @_('IDENTIFIER STAR_EQUALS expr')
+    def operator_assign(self, p):
+        """The `*=` operator"""
+        self.context[p.IDENTIFIER] = _do_assignment_operator('star', '*', self.context[p.IDENTIFIER], p.expr)
+
+    @_('IDENTIFIER SLASH_EQUALS expr')
+    def operator_assign(self, p):
+        """The `/=` operator"""
+        self.context[p.IDENTIFIER] = _do_assignment_operator('slash', '/', self.context[p.IDENTIFIER], p.expr)
 
     @_('expr PERIOD expr')
     def access_expr(self, p):
