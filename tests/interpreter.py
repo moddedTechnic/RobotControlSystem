@@ -201,6 +201,23 @@ class ArithmeticTestCase(unittest.TestCase):
         self.assertIsInstance(_null, Null)
         self.assertIs(_null, null)
 
+    def test_auto_variables(self) -> None:
+        parser = Parser()
+
+        with parser.context:
+            evaluate('auto x = 5;', parser=parser)
+            x = evaluate('x;', parser=parser)[0]
+            self.assertIs(parser.context.get_variable('x').type, Integer)
+            self.assertIsInstance(x, Integer)
+            self.assertEqual(x.value, 5)
+
+        with parser.context:
+            evaluate('auto pi = 22 / 7;', parser=parser)
+            pi = evaluate('pi;', parser=parser)[0]
+            self.assertIs(parser.context.get_variable('pi').type, Rational)
+            self.assertIsInstance(pi, Rational)
+            self.assertEqual((22, 7), pi.as_tuple())
+
     def test_weird_variables(self) -> None:
         parser = Parser()
         parser.context.push({

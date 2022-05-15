@@ -256,10 +256,7 @@ class Context:
         self.__returns: Optional[Value] = None
 
     def __getitem__(self, name: str) -> Value:
-        for frame in reversed(self.stack):
-            if name in frame and frame[name] is not undefined:
-                return frame[name].value
-        raise NameError(f'"{name}" was not defined')
+        return self.get_variable(name).value
 
     def __setitem__(self, name: str, value: Value) -> None:
         for frame in reversed(self.stack):
@@ -291,3 +288,10 @@ class Context:
     def pop(self) -> None:
         """Pop a frame from the stack"""
         self.stack.pop()
+
+    def get_variable(self, name: str) -> Variable:
+        """Get the raw variable for the given name"""
+        for frame in reversed(self.stack):
+            if name in frame and frame[name] is not undefined:
+                return frame[name]
+        raise NameError(f'"{name}" was not defined')

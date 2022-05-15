@@ -96,6 +96,16 @@ class Parser(_Parser):
             raise TypeError(f'Cannot create a variable of type "{typ}" - it is not a type')
         self.context.declare(p.IDENTIFIER1, typ, const=True)
 
+    @_('KWD_AUTO IDENTIFIER EQUALS expr SEMI')
+    def statement(self, p):
+        """Declare a variable"""
+        self.context.declare(p.IDENTIFIER, p.expr.typ, p.expr)
+
+    @_('KWD_CONST KWD_AUTO IDENTIFIER EQUALS expr SEMI')
+    def statement(self, p):
+        """Declare a variable"""
+        self.context.declare(p.IDENTIFIER, p.expr.typ, p.expr, const=True)
+
     @_('IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Assign a value to a variable"""

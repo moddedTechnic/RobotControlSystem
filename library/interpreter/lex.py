@@ -34,8 +34,6 @@ class Lexer(_Lexer):
     ignore_comment_line = r'//.*\n'
     ignore_comment_multi = r'/\*.*\*/'
 
-    IDENTIFIER = r'[a-zA-Z0-9_]+'
-
     KWD_FOR = r'for'
     KWD_WHILE = r'while'
     KWD_IF = r'if'
@@ -44,6 +42,8 @@ class Lexer(_Lexer):
     KWD_CONST = r'const'
     KWD_FINAL = r'final'
     KWD_NONLOCAL = r'nonlocal'
+
+    IDENTIFIER = r'[a-zA-Z0-9_]+'
 
     PLUS = r'\+'
     MINUS = r'-'
