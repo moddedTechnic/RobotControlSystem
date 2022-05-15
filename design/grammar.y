@@ -20,7 +20,8 @@ program   : program statement
 statement : IDENTIFIER IDENTIFIER '=' expr ';'
           | IDENTIFIER IDENTIFIER ';'
           | KWD_CONST IDENTIFIER IDENTIFIER '=' expr ';'
-          | KWD_CONST IDENTIFIER IDENTIFIER ';'
+          | KWD_AUTO IDENTIFIER '=' expr ';'
+          | KWD_CONST KWD_AUTO IDENTIFIER '=' expr ';'
           | IDENTIFIER '=' expr ';'
           | expr ';'
           ;
