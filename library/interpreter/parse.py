@@ -4,7 +4,6 @@ __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
 __all__ = ['parse', 'Parser', 'default_parser']
 
-from turtle import left
 from typing import Iterable
 
 from dependencies.sly.sly import Parser as _Parser
@@ -15,60 +14,6 @@ from .nodes.statement import BlockNode, ForLoopNode, WhileLoopNode, IfNode
 from .nodes.variables import VariableDeclarationNode, VariableAccessNode, VariableDefinitionNode
 from .variables import Context
 from .nodes import operator
-
-
-def _do_binary_operator(name: str, op: str, a, b):
-    handler_name = f'operator_{name}'
-    if hasattr(a, handler_name):
-        handler = getattr(a, handler_name)
-        if (result := handler.call(a, b)) is not NotImplemented:
-            return result
-    reverse_handler_name = f'reverse_operator_{name}'
-    if hasattr(b, reverse_handler_name):
-        reverse_handler = getattr(b, reverse_handler_name)
-        if (result := reverse_handler.call(b, a)) is not NotImplemented:
-            return result
-    raise TypeError(
-        f'unsupported operand type(s) for {op}: "{type(a).__name__}" and "{type(b).__name__}"'
-    )
-
-
-def _do_comparison_operator(name: str, back_name: str, op: str, a, b):
-    handler_name = f'operator_{name}'
-    if hasattr(a, handler_name):
-        handler = getattr(a, handler_name)
-        if (result := handler.call(a, b)) is not NotImplemented:
-            return result
-    back_handler_name = f'operator_{back_name}'
-    if hasattr(b, back_handler_name):
-        back_handler = getattr(b, back_handler_name)
-        if (result := back_handler.call(b, a)) is not NotImplemented:
-            return result
-    raise TypeError(
-        f'unsupported operand type(s) for {op}: "{type(a).__name__}" and "{type(b).__name__}"'
-    )
-
-
-def _do_assignment_operator(name: str, op: str, a, b):
-    handler_name = f'assignment_operator_{name}'
-    if hasattr(a, handler_name):
-        handler = getattr(a, handler_name)
-        if (result := handler.call(a, b)) is not NotImplemented:
-            return result
-    raise TypeError(
-        f'unsupported operand type(s) for {op}=: "{type(a).__name__}" and "{type(b).__name__}"'
-    )
-
-
-def _do_unary_operator(name: str, op: str, a):
-    handler_name = f'unary_operator_{name}'
-    if hasattr(a, handler_name):
-        handler = getattr(a, handler_name)
-        if (result := handler.call(a)) is not NotImplemented:
-            return result
-    raise TypeError(
-        f'bad operand type for {op}: "{type(a).__name__}"'
-    )
 
 
 class Parser(_Parser):
