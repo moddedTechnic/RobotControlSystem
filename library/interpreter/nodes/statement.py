@@ -2,7 +2,7 @@
 
 __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
-__all__ = ['BlockNode']
+__all__ = ['BlockNode', 'ForLoopNode', 'WhileLoopNode', 'IfNode']
 
 from typing import Optional
 
