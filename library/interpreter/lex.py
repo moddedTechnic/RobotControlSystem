@@ -26,7 +26,7 @@ class Lexer(_Lexer):
         PERIOD, EQUALS,
         LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
         SEMI,
-        KWD_FOR, KWD_WHILE, KWD_IF,
+        KWD_FOR, KWD_WHILE, KWD_IF, KWD_ELSE,
         KWD_CLASS,
         KWD_AUTO, KWD_CONST, KWD_FINAL,
         KWD_NONLOCAL,
@@ -40,6 +40,7 @@ class Lexer(_Lexer):
     KWD_FOR = r'for'
     KWD_WHILE = r'while'
     KWD_IF = r'if'
+    KWD_ELSE = r'else'
     KWD_CLASS = f'class'
     KWD_AUTO = r'auto'
     KWD_CONST = r'const'

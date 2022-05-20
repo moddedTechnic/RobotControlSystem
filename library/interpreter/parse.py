@@ -2,14 +2,19 @@
 
 __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
-__all__ = ['parse', 'Parser']
+__all__ = ['parse', 'Parser', 'default_parser']
 
+from turtle import left
 from typing import Iterable
 
 from dependencies.sly.sly import Parser as _Parser
 
 from .lex import Lexer, Token
-from .variables import Integer, Context, Type, Value, undefined, false, true, null
+from .nodes.operator import DotOperatorNode
+from .nodes.statement import BlockNode, ForLoopNode, WhileLoopNode, IfNode
+from .nodes.variables import VariableDeclarationNode, VariableAccessNode, VariableDefinitionNode
+from .variables import Context
+from .nodes import operator
 
 
 def _do_binary_operator(name: str, op: str, a, b):
@@ -86,51 +91,42 @@ class Parser(_Parser):
     @_('statement')
     def program(self, p):
         """A program made of a single statement"""
-        return p.statement,
+        return BlockNode([p.statement])
 
     @_('program statement')
     def program(self, p):
         """A program made of more than one statement"""
-        return *p.program, p.statement
+        return BlockNode([*p.program.children, p.statement])
 
     @_('IDENTIFIER IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Declare a variable"""
-        typ = self.context[p.IDENTIFIER0]
-        if not (isinstance(typ, Type) or (isinstance(typ, type) and issubclass(typ, Value))):
-            raise TypeError(f'Cannot create a variable of type "{typ}" - it is not a type')
-        self.context.declare(p.IDENTIFIER1, typ, p.expr)
+        return VariableDeclarationNode(p.IDENTIFIER1, p.IDENTIFIER0, p.expr)
 
     @_('IDENTIFIER IDENTIFIER SEMI')
     def statement(self, p):
         """Declare a variable"""
-        typ = self.context[p.IDENTIFIER0]
-        if not (isinstance(typ, Type) or (isinstance(typ, type) and issubclass(typ, Value))):
-            raise TypeError(f'Cannot create a variable of type "{typ}" - it is not a type')
-        self.context.declare(p.IDENTIFIER1, typ)
+        return VariableDeclarationNode(p.IDENTIFIER1, p.IDENTIFIER0)
 
     @_('KWD_CONST IDENTIFIER IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Declare a variable"""
-        typ = self.context[p.IDENTIFIER0]
-        if not (isinstance(typ, Type) or (isinstance(typ, type) and issubclass(typ, Value))):
-            raise TypeError(f'Cannot create a variable of type "{typ}" - it is not a type')
-        self.context.declare(p.IDENTIFIER1, typ, p.expr, const=True)
+        return VariableDeclarationNode(p.IDENTIFIER1, p.IDENTIFIER0, p.expr, const=True)
 
     @_('KWD_AUTO IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Declare a variable"""
-        self.context.declare(p.IDENTIFIER, p.expr.typ, p.expr)
+        return VariableDeclarationNode(p.IDENTIFIER, None, p.expr)
 
     @_('KWD_CONST KWD_AUTO IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Declare a variable"""
-        self.context.declare(p.IDENTIFIER, p.expr.typ, p.expr, const=True)
+        return VariableDeclarationNode(p.IDENTIFIER, None, p.expr, const=True)
 
     @_('IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
         """Assign a value to a variable"""
-        self.context[p.IDENTIFIER] = p.expr
+        return VariableDefinitionNode(p.IDENTIFIER, p.expr)
 
     @_('operator_assign SEMI')
     def statement(self, p):
@@ -143,34 +139,59 @@ class Parser(_Parser):
         return p.expr
 
     @_('LEFT_BRACE program RIGHT_BRACE')
-    def statement(self, p) -> list:
+    def statement(self, p) -> BlockNode:
         """Represents a block of statements"""
         return p.program
+
+    @_('LEFT_BRACE RIGHT_BRACE')
+    def statement(self, _) -> BlockNode:
+        """Represents an empty block of statements"""
+        return BlockNode([])
+
+    @_('KWD_FOR LEFT_PAREN statement statement expr RIGHT_PAREN statement')
+    def statement(self, p):
+        """For loop"""
+        return ForLoopNode(p.statement0, p.statement1, p.expr, p.statement2)
+
+    @_('KWD_WHILE LEFT_PAREN expr RIGHT_PAREN statement')
+    def statement(self, p):
+        """While loop"""
+        return WhileLoopNode(p.expr, p.statement)
+
+    @_('KWD_IF LEFT_PAREN expr RIGHT_PAREN statement')
+    def statement(self, p):
+        """If statement"""
+        return IfNode(p.expr, p.statement, BlockNode([]))
+
+    @_('KWD_IF LEFT_PAREN expr RIGHT_PAREN statement KWD_ELSE statement')
+    def statement(self, p):
+        """If statement"""
+        return IfNode(p.expr, p.statement0, p.statement1)
 
     @_('IDENTIFIER PLUS_EQUALS expr')
     def operator_assign(self, p):
         """The `+=` operator"""
-        self.context[p.IDENTIFIER] = _do_assignment_operator('plus', '+', self.context[p.IDENTIFIER], p.expr)
+        return operator.PlusEqualsOperatorNode(p.IDENTIFIER, p.expr)
 
     @_('IDENTIFIER MINUS_EQUALS expr')
     def operator_assign(self, p):
         """The `-=` operator"""
-        self.context[p.IDENTIFIER] = _do_assignment_operator('minus', '-', self.context[p.IDENTIFIER], p.expr)
+        return operator.MinusEqualsOperatorNode(p.IDENTIFIER, p.expr)
 
     @_('IDENTIFIER STAR_EQUALS expr')
     def operator_assign(self, p):
         """The `*=` operator"""
-        self.context[p.IDENTIFIER] = _do_assignment_operator('star', '*', self.context[p.IDENTIFIER], p.expr)
+        return operator.StarEqualsOperatorNode(p.IDENTIFIER, p.expr)
 
     @_('IDENTIFIER SLASH_EQUALS expr')
     def operator_assign(self, p):
         """The `/=` operator"""
-        self.context[p.IDENTIFIER] = _do_assignment_operator('slash', '/', self.context[p.IDENTIFIER], p.expr)
+        return operator.SlashEqualsOperatorNode(p.IDENTIFIER, p.expr)
 
     @_('expr PERIOD expr')
     def access_expr(self, p):
         """Dot expressions"""
-        return p.expr0.operator_dot.call(p.expr0, p.expr1)
+        return DotOperatorNode(p.expr0, p.expr1)
 
     @_('access_expr')
     def expr(self, p):
@@ -180,32 +201,32 @@ class Parser(_Parser):
     @_('expr LESS expr')
     def logic_expr(self, p):
         """a < b"""
-        return _do_comparison_operator('less', 'greater', '<', p.expr0, p.expr1)
+        return operator.LessOperatorNode(p.expr0, p.expr1)
 
     @_('expr LESS_EQUAL expr')
     def logic_expr(self, p):
         """a <= b"""
-        return _do_comparison_operator('less_equal', 'greater_equal', '<=', p.expr0, p.expr1)
+        return operator.LessEqualOperatorNode(p.expr0, p.expr1)
 
     @_('expr GREATER expr')
     def logic_expr(self, p):
         """a > b"""
-        return _do_comparison_operator('greater', 'less', '>', p.expr0, p.expr1)
+        return operator.GreaterOperatorNode(p.expr0, p.expr1)
 
     @_('expr GREATER_EQUAL expr')
     def logic_expr(self, p):
         """a >= b"""
-        return _do_comparison_operator('greater_equal', 'less_equal', '>=', p.expr0, p.expr1)
+        return operator.GreaterEqualOperatorNode(p.expr0, p.expr1)
 
     @_('expr EQUALITY expr')
     def logic_expr(self, p):
         """a == b"""
-        return _do_comparison_operator('equality', 'equality', '==', p.expr0, p.expr1)
+        return operator.EqualityOperatorNode(p.expr0, p.expr1)
 
     @_('expr NONEQUALITY expr')
     def logic_expr(self, p):
         """a != b"""
-        return _do_comparison_operator('nonequality', 'nonequality', '!=', p.expr0, p.expr1)
+        return operator.NonEqualityOperatorNode(p.expr0, p.expr1)
 
     @_('expr IDENTITY expr')
     def logic_expr(self, p):
@@ -220,36 +241,32 @@ class Parser(_Parser):
     @_('expr PLUS expr')
     def expr(self, p):
         """Plus expressions"""
-        return _do_binary_operator('plus', '+', p.expr0, p.expr1)
+        return operator.PlusOperatorNode(p.expr0, p.expr1)
 
     @_('expr MINUS expr')
     def expr(self, p):
         """Minus expressions"""
-        return _do_binary_operator('minus', '+', p.expr0, p.expr1)
+        return operator.MinusOperatorNode(p.expr0, p.expr1)
 
     @_('expr STAR expr')
     def expr(self, p):
         """Star expressions"""
-        return _do_binary_operator('star', '*', p.expr0, p.expr1)
+        return operator.StarOperatorNode(p.expr0, p.expr1)
 
     @_('expr SLASH expr')
     def expr(self, p):
         """Slash expressions"""
-        return _do_binary_operator('slash', '/', p.expr0, p.expr1)
+        return operator.SlashOperatorNode(p.expr0, p.expr1)
 
     @_('IDENTIFIER INCREMENT')
     def expr(self, p):
         """Increment expressions"""
-        name = p.IDENTIFIER
-        self.context[name] = _do_unary_operator('increment', '++', self.context[name])
-        return self.context[name]
+        return operator.IncrementOperatorNode(p.IDENTIFIER)
 
     @_('IDENTIFIER DECREMENT')
     def expr(self, p):
         """Increment expressions"""
-        name = p.IDENTIFIER
-        self.context[name] = _do_unary_operator('decrement', '--', self.context[name])
-        return self.context[name]
+        return operator.DecrementOperatorNode(p.IDENTIFIER)
 
     @_('PLUS expr %prec UNARY_PLUS')
     def expr(self, p):
@@ -269,26 +286,12 @@ class Parser(_Parser):
     @_('IDENTIFIER')
     def expr(self, p):
         """An expression containing a single identifier"""
-        name: str = p.IDENTIFIER
-        try:
-            return self.context[name]
-        except NameError:
-            if name.isdigit():
-                return Integer(name)
-            if name == 'true':
-                return true
-            if name == 'false':
-                return false
-            if name == 'null':
-                return null
-            if name == 'undefined':
-                return undefined
-            raise
+        return VariableAccessNode(p.IDENTIFIER)
 
 
-_parser = Parser()
+default_parser = Parser()
 
 
 def parse(tokens: Iterable[Token]):
     """Convert a stream of tokens to an abstract syntax tree"""
-    return _parser.parse(tokens)
+    return default_parser.parse(tokens)

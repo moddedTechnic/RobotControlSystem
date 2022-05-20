@@ -14,8 +14,6 @@ from typing import Any, Union, Optional, Callable, Type as PyType
 
 from library import maths
 
-from .nodes import Node
-
 
 @dataclass
 class Value:
@@ -66,7 +64,7 @@ class Arguments:
 class Function(Value):
     """Represents a function in the context"""
 
-    def __init__(self, signature: Signature, body: list[Node] | Callable):
+    def __init__(self, signature: Signature, body: list | Callable):
         super().__init__(type(self), None)
         self.signature = signature
         self.body = body
@@ -251,10 +249,21 @@ class Integer(Value):
         return NotImplemented
 
     @Function.from_native
-    def operator_dot(self, other: 'Integer') -> Rational:
+    def operator_get(self, other: 'Integer | str') -> Rational:
         """Override the dot operator for integers"""
-        x = len(str(other)) + other.leading_zeros
-        return Rational(self.value * (10 ** x) + other.value, 10 ** x)
+        if isinstance(other, str):
+            x = len(other)
+            for c in other:
+                if c != '0':
+                    break
+                x += 1
+            if other.startswith('0'):
+                x -= 1
+            value = int(other)
+        else:
+            x = len(str(other)) + other.leading_zeros
+            value = other.value
+        return Rational(self.value * (10 ** x) + value, 10 ** x)
 
     @Function.from_native
     def operator_less(self, other: 'Integer') -> 'Boolean':

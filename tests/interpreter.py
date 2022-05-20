@@ -404,6 +404,55 @@ class ArithmeticTestCase(unittest.TestCase):
         _check(nonequality_2, false)
         _check(nonequality_3, true)
 
+    def test_for_loop(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int a = 1;', parser=parser)
+            evaluate('for (int x = 0; x < 10; x++) { a *= 2; }', parser=parser)
+            a = evaluate('a;', parser=parser)[0]
+            self.assertEqual(1024, a.value)
+
+    def test_while_loop(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int a = 1;', parser=parser)
+            evaluate('while (a < 1000) a *= 2;', parser=parser)
+            a = evaluate('a;', parser=parser)[0]
+            self.assertEqual(1024, a.value)
+
+    def test_if_statement(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int x = 0;', parser=parser)
+            evaluate('if (true) x = 1;', parser=parser)
+            self.assertEqual(1, evaluate('x;', parser=parser)[0].value)
+
+        with parser.context:
+            evaluate('int y = 0;', parser=parser)
+            evaluate('if (false) y = 1;', parser=parser)
+            self.assertEqual(0, evaluate('y;', parser=parser)[0].value)
+
+    def test_if_else_statement(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int x = 0;', parser=parser)
+            evaluate('if (true) x = 1; else x = 2;', parser=parser)
+            self.assertEqual(1, evaluate('x;', parser=parser)[0].value)
+
+        with parser.context:
+            evaluate('int y = 0;', parser=parser)
+            evaluate('if (false) y = 1; else y = 2;', parser=parser)
+            self.assertEqual(2, evaluate('y;', parser=parser)[0].value)
+
+
 
 if __name__ == '__main__':
     unittest.main()
