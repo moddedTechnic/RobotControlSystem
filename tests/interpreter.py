@@ -148,7 +148,8 @@ class ArithmeticTestCase(unittest.TestCase):
         with parser.context:
             evaluate('int x;', parser=parser)
             self.assertIn('x', parser.context)
-            self.assertIs(parser.context['x'], undefined)
+            x = parser.context.get_variable('x', allow_undefined=True)
+            self.assertIs(x.value, undefined)
 
         with parser.context:
             evaluate('int y = 5;', parser=parser)
@@ -210,16 +211,12 @@ class ArithmeticTestCase(unittest.TestCase):
         parser = Parser()
 
         with parser.context:
-            evaluate('auto x = 5;', parser=parser)
-            x = evaluate('x;', parser=parser)[0]
-            self.assertIs(parser.context.get_variable('x').type, Integer)
+            x = evaluate('auto x = 5; x;', parser=parser)[-1]
             self.assertIsInstance(x, Integer)
             self.assertEqual(x.value, 5)
 
         with parser.context:
-            evaluate('auto pi = 22 / 7;', parser=parser)
-            pi = evaluate('pi;', parser=parser)[0]
-            self.assertIs(parser.context.get_variable('pi').type, Rational)
+            pi = evaluate('auto pi = 22 / 7; pi;', parser=parser)[-1]
             self.assertIsInstance(pi, Rational)
             self.assertEqual((22, 7), pi.as_tuple())
 
@@ -452,6 +449,21 @@ class ArithmeticTestCase(unittest.TestCase):
             evaluate('if (false) y = 1; else y = 2;', parser=parser)
             self.assertEqual(2, evaluate('y;', parser=parser)[0].value)
 
+    def test_variable_locality(self) -> None:
+        parser = Parser()
+        parser.context.push({'int': Variable(Integer, Type, True)})
+
+        with parser.context:
+            evaluate('int 3 = 0; int x;', parser=parser)
+            evaluate('{ nonlocal 3; x = 3; }', parser=parser)
+            x = evaluate('x;', parser=parser)[0]
+            self.assertEqual(0, x.value)
+
+        with parser.context:
+            evaluate('int 3 = 0; int x;', parser=parser)
+            evaluate('{ x = 3; }', parser=parser)
+            x = evaluate('x;', parser=parser)[0]
+            self.assertEqual(3, x.value)
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ from dependencies.sly.sly import Parser as _Parser
 from .lex import Lexer, Token
 from .nodes.operator import DotOperatorNode
 from .nodes.statement import BlockNode, ForLoopNode, WhileLoopNode, IfNode
-from .nodes.variables import VariableDeclarationNode, VariableAccessNode, VariableDefinitionNode
+from .nodes.variables import VariableDeclarationNode, VariableAccessNode, VariableDefinitionNode, NonLocalVariableNode
 from .variables import Context
 from .nodes import operator
 
@@ -36,12 +36,17 @@ class Parser(_Parser):
     @_('statement')
     def program(self, p):
         """A program made of a single statement"""
-        return BlockNode([p.statement])
+        return BlockNode([p.statement], push_frame=False)
 
     @_('program statement')
     def program(self, p):
         """A program made of more than one statement"""
-        return BlockNode([*p.program.children, p.statement])
+        return BlockNode([*p.program.children, p.statement], push_frame=False)
+
+    @_('KWD_NONLOCAL IDENTIFIER SEMI')
+    def statement(self, p):
+        """Declare a variable"""
+        return NonLocalVariableNode(p.IDENTIFIER)
 
     @_('IDENTIFIER IDENTIFIER EQUALS expr SEMI')
     def statement(self, p):
@@ -86,7 +91,9 @@ class Parser(_Parser):
     @_('LEFT_BRACE program RIGHT_BRACE')
     def statement(self, p) -> BlockNode:
         """Represents a block of statements"""
-        return p.program
+        block: BlockNode = p.program
+        block.push_frame = True
+        return block
 
     @_('LEFT_BRACE RIGHT_BRACE')
     def statement(self, _) -> BlockNode:

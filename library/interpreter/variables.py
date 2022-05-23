@@ -354,18 +354,30 @@ Frame = dict[str, Variable]
 class Context:
     """Represents the evaluation context of the program"""
 
+    NONLOCAL = object()
+
     def __init__(self) -> None:
         self.stack: list[Frame] = []
         self.__returns: Optional[Value] = None
+
+    def __repr__(self) -> str:
+        res = f'{type(self).__name__}(\n'
+        res += '    stack=[\n'
+        for frame in reversed(self.stack):
+            res += f'        {frame},\n'
+        res += '    ]\n'
+        res += ')'
+        return res
 
     def __getitem__(self, name: str) -> Value:
         return self.get_variable(name).value
 
     def __setitem__(self, name: str, value: Value) -> None:
         for frame in reversed(self.stack):
-            if name in frame and isinstance(value, frame[name].type) and not frame[name].const:
-                frame[name].value = value
-                return
+            if name in frame:
+                if frame[name].value is not self.NONLOCAL and isinstance(value, frame[name].type) and not frame[name].const:
+                    frame[name].value = value
+                    return
         raise NameError(f'"{name}" was not declared in the current scope, or it was declared as constant')
 
     def __contains__(self, name: str) -> bool:
@@ -392,9 +404,17 @@ class Context:
         """Pop a frame from the stack"""
         self.stack.pop()
 
-    def get_variable(self, name: str) -> Variable:
+    def peek(self) -> Frame:
+        """Peek at the top frame in the stack"""
+        if self.stack:
+            return self.stack[-1]
+        return {}
+
+    def get_variable(self, name: str, *, allow_undefined: bool = False) -> Variable:
         """Get the raw variable for the given name"""
         for frame in reversed(self.stack):
-            if name in frame and frame[name] is not undefined:
-                return frame[name]
+            if name in frame:
+                if frame[name].value is not self.NONLOCAL:
+                    if allow_undefined or frame[name].value is not undefined:
+                        return frame[name]
         raise NameError(f'"{name}" was not defined')

@@ -2,12 +2,23 @@
 
 __author__ = 'Jonathan Leeming'
 __version__ = '0.1'
-__all__ = ['VariableDeclarationNode', 'VariableDefinitionNode', 'VariableAccessNode']
+__all__ = ['NonLocalVariableNode', 'VariableDeclarationNode', 'VariableDefinitionNode', 'VariableAccessNode']
 
 from typing import Optional
 
 from library.interpreter.nodes import Node
 from library.interpreter.variables import Type, Context, Value, Integer, true, false, null, undefined
+
+
+class NonLocalVariableNode(Node):
+    """Marks a variable as being non-local"""
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def evaluate(self, context: Context):
+        """Make the variable nonlocal"""
+        context.declare(self.name, type(Context.NONLOCAL), Context.NONLOCAL)
 
 
 class VariableDeclarationNode(Node):
@@ -18,6 +29,10 @@ class VariableDeclarationNode(Node):
         self.typ_name = typ_name
         self.child = child
         self.const = const
+
+    def __repr__(self) -> str:
+        typ_name = 'auto' if self.typ_name is None else self.typ_name
+        return f'{type(self).__name__}{self.name, typ_name, self.child}'
 
     def evaluate(self, context: Context):
         """Evaluate the node"""
@@ -39,6 +54,9 @@ class VariableDefinitionNode(Node):
         self.name = name
         self.child = child
 
+    def __repr__(self) -> str:
+        return f'{type(self).__name__}({self.name}, {self.child})'
+
     def evaluate(self, context: Context):
         """Define the variable"""
         context[self.name] = self.child.evaluate(context)
@@ -53,19 +71,18 @@ class VariableAccessNode(Node):
     def __repr__(self) -> str:
         return f'{type(self).__name__}({self.name})'
 
-    def evaluate(self, context):
+    def evaluate(self, context: Context):
         """Retrieve the value of the variable from the context"""
-        try:
+        if self.name in context.peek():
             return context[self.name]
-        except NameError:
-            if self.name.isdigit():
-                return Integer(self.name)
-            if self.name == 'true':
-                return true
-            if self.name == 'false':
-                return false
-            if self.name == 'null':
-                return null
-            if self.name == 'undefined':
-                return undefined
-            raise
+        if self.name.isdigit():
+            return Integer(self.name)
+        if self.name == 'true':
+            return true
+        if self.name == 'false':
+            return false
+        if self.name == 'null':
+            return null
+        if self.name == 'undefined':
+            return undefined
+        return context[self.name]

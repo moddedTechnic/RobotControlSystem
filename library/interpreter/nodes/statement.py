@@ -13,12 +13,18 @@ from library.interpreter.variables import Context, Value
 class BlockNode(Node):
     """Represents a block of statements"""
 
-    def __init__(self, children: list[Node]) -> None:
+    def __init__(self, children: list[Node], push_frame: bool = True) -> None:
         self.children = children
+        self.push_frame = push_frame
 
     def evaluate(self, context: Context) -> list[Optional[Value]]:
         """Evaluate the statements in the block"""
-        return [c.evaluate(context) for c in self.children]
+        if self.push_frame:
+            context.push()
+        res = [c.evaluate(context) for c in self.children]
+        if self.push_frame:
+            context.pop()
+        return res
 
 
 class ForLoopNode(Node):
