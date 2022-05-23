@@ -24,7 +24,14 @@ from library.interpreter.variables import (
 )
 
 
-class ArithmeticTestCase(unittest.TestCase):
+class BaseTest(unittest.TestCase):
+    def setUp(self) -> None:
+        """Prepare for the test by creating a parser"""
+        self.parser = Parser()
+        self.parser.context.push({'int': Variable(Integer, Type, True)})
+
+
+class NumbersTestCase(BaseTest):
     def test_integer(self) -> None:
         self.assertEqual(evaluate('0;')[0].value, 0)
         self.assertEqual(evaluate('1;')[0].value, 1)
@@ -75,6 +82,8 @@ class ArithmeticTestCase(unittest.TestCase):
         self.assertEqual((15, 4), evaluate('3.75;')[0].as_tuple())
         self.assertEqual((2107, 20), evaluate('105.35;')[0].as_tuple())
 
+
+class ArithmeticTestCase(BaseTest):
     def test_addition(self) -> None:
         self.assertEqual(3, evaluate('1 + 2;')[0].value)
         self.assertEqual((3, 1), evaluate('1.0 + 2.0;')[0].as_tuple())
@@ -141,46 +150,39 @@ class ArithmeticTestCase(unittest.TestCase):
         self.assertEqual((2, 1), evaluate('2 / 1.0;')[0].as_tuple())
         self.assertEqual((2, 1), evaluate('2.0 / 1;')[0].as_tuple())
 
-    def test_variable_declaration(self) -> None:
-        parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
 
-        with parser.context:
-            evaluate('int x;', parser=parser)
-            self.assertIn('x', parser.context)
-            x = parser.context.get_variable('x', allow_undefined=True)
+class VariablesTestCase(BaseTest):
+    def test_variable_declaration(self) -> None:
+        with self.parser.context:
+            evaluate('int x;', parser=self.parser)
+            self.assertIn('x', self.parser.context)
+            x = self.parser.context.get_variable('x', allow_undefined=True)
             self.assertIs(x.value, undefined)
 
-        with parser.context:
-            evaluate('int y = 5;', parser=parser)
-            self.assertIn('y', parser.context)
-            self.assertIsInstance(parser.context['y'], Integer)
-            self.assertEqual(parser.context['y'].value, 5)
+        with self.parser.context:
+            evaluate('int y = 5;', parser=self.parser)
+            self.assertIn('y', self.parser.context)
+            self.assertIsInstance(self.parser.context['y'], Integer)
+            self.assertEqual(self.parser.context['y'].value, 5)
 
     def test_variable_definition(self) -> None:
-        parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
-
-        with parser.context:
-            evaluate('int x;', parser=parser)
-            evaluate('x = 5;', parser=parser)
-            self.assertIn('x', parser.context)
-            self.assertIsInstance(parser.context['x'], Integer)
-            self.assertEqual(5, parser.context['x'].value)
+        with self.parser.context:
+            evaluate('int x;', parser=self.parser)
+            evaluate('x = 5;', parser=self.parser)
+            self.assertIn('x', self.parser.context)
+            self.assertIsInstance(self.parser.context['x'], Integer)
+            self.assertEqual(5, self.parser.context['x'].value)
 
     def test_variable_access(self) -> None:
-        parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
-
-        with parser.context:
-            evaluate('int x = 5;', parser=parser)
-            x = evaluate('x;', parser=parser)[0]
+        with self.parser.context:
+            evaluate('int x = 5;', parser=self.parser)
+            x = evaluate('x;', parser=self.parser)[0]
             self.assertIsInstance(x, Integer)
             self.assertEqual(5, x.value)
 
-        with parser.context:
+        with self.parser.context:
             with self.assertRaises(NameError):
-                evaluate('y;', parser=parser)
+                evaluate('y;', parser=self.parser)
 
     def test_boolean_variables(self) -> None:
         parser = Parser()
@@ -240,6 +242,21 @@ class ArithmeticTestCase(unittest.TestCase):
             self.assertIsInstance(pi, Rational)
             self.assertEqual((157, 50), pi.as_tuple())
 
+    def test_variable_locality(self) -> None:
+        with self.parser.context:
+            evaluate('int 3 = 0; int x;', parser=self.parser)
+            evaluate('{ nonlocal 3; x = 3; }', parser=self.parser)
+            x = evaluate('x;', parser=self.parser)[0]
+            self.assertEqual(0, x.value)
+
+        with self.parser.context:
+            evaluate('int 3 = 0; int x;', parser=self.parser)
+            evaluate('{ x = 3; }', parser=self.parser)
+            x = evaluate('x;', parser=self.parser)[0]
+            self.assertEqual(3, x.value)
+
+
+class OperatorTestCase(BaseTest):
     def test_increment(self) -> None:
         parser = Parser()
 
@@ -401,69 +418,48 @@ class ArithmeticTestCase(unittest.TestCase):
         _check(nonequality_2, false)
         _check(nonequality_3, true)
 
-    def test_for_loop(self) -> None:
-        parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
 
-        with parser.context:
-            evaluate('int a = 1;', parser=parser)
-            evaluate('for (int x = 0; x < 10; x++) { a *= 2; }', parser=parser)
-            a = evaluate('a;', parser=parser)[0]
+class ControlFlowTestCase(BaseTest):
+    def test_for_loop(self) -> None:
+        with self.parser.context:
+            evaluate('int a = 1;', parser=self.parser)
+            evaluate('for (int x = 0; x < 10; x++) { a *= 2; }', parser=self.parser)
+            a = evaluate('a;', parser=self.parser)[0]
             self.assertEqual(1024, a.value)
 
     def test_while_loop(self) -> None:
-        parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
-
-        with parser.context:
-            evaluate('int a = 1;', parser=parser)
-            evaluate('while (a < 1000) a *= 2;', parser=parser)
-            a = evaluate('a;', parser=parser)[0]
+        with self.parser.context:
+            evaluate('int a = 1;', parser=self.parser)
+            evaluate('while (a < 1000) a *= 2;', parser=self.parser)
+            a = evaluate('a;', parser=self.parser)[0]
             self.assertEqual(1024, a.value)
 
     def test_if_statement(self) -> None:
-        parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
+        with self.parser.context:
+            evaluate('int x = 0;', parser=self.parser)
+            evaluate('if (true) x = 1;', parser=self.parser)
+            self.assertEqual(1, evaluate('x;', parser=self.parser)[0].value)
 
-        with parser.context:
-            evaluate('int x = 0;', parser=parser)
-            evaluate('if (true) x = 1;', parser=parser)
-            self.assertEqual(1, evaluate('x;', parser=parser)[0].value)
-
-        with parser.context:
-            evaluate('int y = 0;', parser=parser)
-            evaluate('if (false) y = 1;', parser=parser)
-            self.assertEqual(0, evaluate('y;', parser=parser)[0].value)
+        with self.parser.context:
+            evaluate('int y = 0;', parser=self.parser)
+            evaluate('if (false) y = 1;', parser=self.parser)
+            self.assertEqual(0, evaluate('y;', parser=self.parser)[0].value)
 
     def test_if_else_statement(self) -> None:
+        with self.parser.context:
+            evaluate('int x = 0;', parser=self.parser)
+            evaluate('if (true) x = 1; else x = 2;', parser=self.parser)
+            self.assertEqual(1, evaluate('x;', parser=self.parser)[0].value)
+
+        with self.parser.context:
+            evaluate('int y = 0;', parser=self.parser)
+            evaluate('if (false) y = 1; else y = 2;', parser=self.parser)
+            self.assertEqual(2, evaluate('y;', parser=self.parser)[0].value)
+
+
+class FunctionTestCase(BaseTest):
+    def test_function_definition(self) -> None:
         parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
-
-        with parser.context:
-            evaluate('int x = 0;', parser=parser)
-            evaluate('if (true) x = 1; else x = 2;', parser=parser)
-            self.assertEqual(1, evaluate('x;', parser=parser)[0].value)
-
-        with parser.context:
-            evaluate('int y = 0;', parser=parser)
-            evaluate('if (false) y = 1; else y = 2;', parser=parser)
-            self.assertEqual(2, evaluate('y;', parser=parser)[0].value)
-
-    def test_variable_locality(self) -> None:
-        parser = Parser()
-        parser.context.push({'int': Variable(Integer, Type, True)})
-
-        with parser.context:
-            evaluate('int 3 = 0; int x;', parser=parser)
-            evaluate('{ nonlocal 3; x = 3; }', parser=parser)
-            x = evaluate('x;', parser=parser)[0]
-            self.assertEqual(0, x.value)
-
-        with parser.context:
-            evaluate('int 3 = 0; int x;', parser=parser)
-            evaluate('{ x = 3; }', parser=parser)
-            x = evaluate('x;', parser=parser)[0]
-            self.assertEqual(3, x.value)
 
 
 if __name__ == '__main__':
